@@ -7,7 +7,7 @@
     <string name="close">close</string>
     <string name="open">open</string>
 
-    <string name="app_name">ERP</string>
+    <string name="app_name">chatApp</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
 
@@ -126,6 +126,7 @@
     <string name="number_of_images">%d image(s)</string>
     <string name="new_york">New York</string>
     <string name="account">Account</string>
+    <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="nickName">NickName</string>
     <string name="sex">Sex</string>

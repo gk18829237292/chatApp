@@ -65,6 +65,7 @@ public class MainActivity extends Activity {
     private void initData(){
         try {
             client = IO.socket(serer_address);
+            client.connect();
             client.on("userInfo", new Emitter.Listener() {
                 @Override
                 public void call(Object... args) {
@@ -102,14 +103,15 @@ public class MainActivity extends Activity {
                 @Override
                 public void call(Object... args) {
                     int result = (int) args[0];
+                    System.out.println("result : " + result);
                     if (result == 0){
-                        Toast.makeText(MainActivity.this,"登录失败",Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this,"登录失败",Toast.LENGTH_SHORT).show();
                     }else {
-                        Toast.makeText(MainActivity.this,"登录成功",Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this,"登录成功",Toast.LENGTH_SHORT).show();
                     }
                 }
             });
-            client.connect();
+
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }

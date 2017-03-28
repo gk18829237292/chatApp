@@ -28,7 +28,7 @@
                 android:gravity="end"
                 android:layout_margin="0dp"
                 android:background="@android:color/transparent"
-                android:text="注册"
+                android:text="REGISTER"
                 android:textColor="@color/main_color_500"
                 />
 
@@ -61,12 +61,12 @@
             tools:ignore="SpUsage" />
 
         <com.gk.chatapp.view.FloatLabeledEditText
-            android:id="@+id/txt_username"
+            android:id="@+id/tv_account"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_weight="1"
-            app:fletFloatingHint="@string/username"
+            app:fletFloatingHint="@string/account"
             app:fletHintTextColor="@color/main_color_500"
             app:fletSingleLine="true"
             app:fletTextBackground="@drawable/edit_text_background_accent"
@@ -89,7 +89,7 @@
             tools:ignore="SpUsage" />
 
         <com.gk.chatapp.view.FloatLabeledEditText
-            android:id="@+id/txt_password"
+            android:id="@+id/tv_password"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -115,7 +115,7 @@
             app:rippleColor="@color/main_color_grey_400" >
 
             <com.gk.chatapp.font.RobotoTextView
-                android:id="@+id/login"
+                android:id="@+id/tv_login"
                 style="@style/ButtonStyle.RaisedEmpty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
