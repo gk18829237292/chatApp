@@ -125,10 +125,10 @@
     <string name="thicker_and_darker_version">Thicker and darker version of Material design</string>
     <string name="number_of_images">%d image(s)</string>
     <string name="new_york">New York</string>
-    <string name="username">Username</string>
+    <string name="account">Account</string>
     <string name="password">Password</string>
-    <string name="email">E-mail</string>
-    <string name="country">Country</string>
+    <string name="nickName">NickName</string>
+    <string name="sex">Sex</string>
     <string name="city">City</string>
     <string name="welcome">Welcome!</string>
     <string name="undo_deletion">UNDO DELETION</string>

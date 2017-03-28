@@ -9,9 +9,33 @@
     android:orientation="vertical"
     android:padding="24dp" >
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:orientation="vertical"
+        >
+        <com.gk.chatapp.view.MaterialRippleLayout
+            style="@style/RippleStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:rippleColor="@color/main_color_grey_400">
 
+            <com.gk.chatapp.font.RobotoTextView
+                android:id="@+id/tv_register"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:layout_margin="0dp"
+                android:background="@android:color/transparent"
+                android:text="注册"
+                android:textColor="@color/main_color_500"
+                />
 
-    <com.gk.erp.font.FontelloTextView
+        </com.gk.chatapp.view.MaterialRippleLayout>
+    </LinearLayout>
+
+    <com.gk.chatapp.font.FontelloTextView
         android:id="@+id/logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,7 +51,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical" >
 
-        <com.gk.erp.font.FontelloTextView
+        <com.gk.chatapp.font.FontelloTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -36,7 +60,7 @@
             android:textSize="16dp"
             tools:ignore="SpUsage" />
 
-        <com.gk.erp.view.FloatLabeledEditText
+        <com.gk.chatapp.view.FloatLabeledEditText
             android:id="@+id/txt_username"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -55,7 +79,7 @@
         android:layout_marginTop="6dp"
         android:gravity="center_vertical" >
 
-        <com.gk.erp.font.FontelloTextView
+        <com.gk.chatapp.font.FontelloTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
@@ -64,7 +88,7 @@
             android:textSize="16dp"
             tools:ignore="SpUsage" />
 
-        <com.gk.erp.view.FloatLabeledEditText
+        <com.gk.chatapp.view.FloatLabeledEditText
             android:id="@+id/txt_password"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -83,14 +107,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="54dp" >
 
-        <com.gk.erp.view.MaterialRippleLayout
+        <com.gk.chatapp.view.MaterialRippleLayout
             style="@style/RippleStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="3dp"
             app:rippleColor="@color/main_color_grey_400" >
 
-            <com.gk.erp.font.RobotoTextView
+            <com.gk.chatapp.font.RobotoTextView
                 android:id="@+id/login"
                 style="@style/ButtonStyle.RaisedEmpty"
                 android:layout_width="wrap_content"
@@ -100,7 +124,7 @@
                 android:minWidth="200dp"
                 android:text="@string/login"
                 android:textColor="#fff" />
-        </com.gk.erp.view.MaterialRippleLayout>
+        </com.gk.chatapp.view.MaterialRippleLayout>
 
 
     </LinearLayout>
