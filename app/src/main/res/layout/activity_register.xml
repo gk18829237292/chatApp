@@ -49,6 +49,7 @@
                 android:textSize="22dp"
                 />
             <com.gk.chatapp.view.FloatLabeledEditText
+                android:id="@+id/et_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -78,6 +79,7 @@
                 android:textSize="22dp"  />
 
             <com.gk.chatapp.view.FloatLabeledEditText
+                android:id="@+id/et_password"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -109,6 +111,7 @@
                 android:textSize="22dp" />
 
             <com.gk.chatapp.view.FloatLabeledEditText
+                android:id="@+id/et_nickname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -136,6 +139,7 @@
                 android:textColor="@color/main_color_grey_300"
                 android:textSize="22dp" />
             <com.gk.chatapp.view.FloatLabeledEditText
+                android:id="@+id/et_sex"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -156,6 +160,7 @@
             android:gravity="right" >
 
             <com.gk.chatapp.font.RobotoTextView
+                
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tv_register"

@@ -5,6 +5,12 @@ package com.gk.chatapp.constant;
  */
 
 public class Constant {
+    //登录
     public static final String LOGIN_RESULT="login_result";
     public static final String LOGIN_EVENT="login";
+
+    //注册
+    public static final String REGISTER_RESULT="register_result";
+    public static final String REGISTER_EVENT="register";
+
 }

@@ -9,10 +9,10 @@ import android.content.Context;
 
 public class ProgressDialogFactory {
 
-    public static ProgressDialog getProgressDialog(Context context){
+    public static ProgressDialog getProgressDialog(Context context,String message){
         ProgressDialog dialog = new ProgressDialog(context);
         dialog.setCancelable(false);
-        dialog.setMessage("登录中···");
+        dialog.setMessage(message);
         return dialog;
     }
 

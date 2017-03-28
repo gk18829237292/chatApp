@@ -6,7 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import com.gk.chatapp.utils.SocketIOUtils;
+import com.gk.chatapp.utils.SocketIoUtils;
 
 /**
  * Created by ke.gao on 2017/3/28.
@@ -23,7 +23,7 @@ public class App extends Application{
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-        SocketIOUtils.init();
+        SocketIoUtils.init();
         Log.d(TAG,"create");
     }
 
