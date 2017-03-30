@@ -26,14 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
-    private static final int REQUESTFORUPDATE_TASK = 123;
-    private static final int REQUESTFORUPDATE_DEPART = 456;
+
     private DrawerLayout mDrawLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
 
-    private CharSequence mDrawerTitle;
-    private CharSequence mTitle;
 
     private List<DrawerItem> mDrawerItems;
 
@@ -55,8 +52,6 @@ public class MainActivity extends ActionBarActivity {
         if(savedInstanceState == null){
             int position = 0;
             selectItem(position+1,mDrawerItems.get(position).getTag());
-            //TODO change
-//            mDrawLayout.openDrawer(mDrawerList);
         }
 
         mDrawLayout.setDrawerListener(mDrawerToggle);
@@ -183,17 +178,7 @@ public class MainActivity extends ActionBarActivity {
     //TODO 菜单选项 空白处理就好
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         return super.onCreateOptionsMenu(menu);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK){
-            switch (requestCode){
-
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.gk.erp.view.MaterialRippleLayout
+<com.gk.chatapp.view.MaterialRippleLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     style="@style/RippleStyle"
@@ -15,7 +15,7 @@
         android:orientation="horizontal"
         android:paddingBottom="4dp"
         android:paddingTop="4dp">
-        <com.gk.erp.font.FontelloTextView
+        <com.gk.chatapp.font.FontelloTextView
             android:id="@+id/icon"
             style="@style/TextViewAppearance.Title1"
             android:layout_width="wrap_content"
@@ -23,7 +23,7 @@
             android:paddingLeft="18dp"
             android:textColor="@drawable/selector_text_empty"/>
 
-        <com.gk.erp.font.RobotoTextView
+        <com.gk.chatapp.font.RobotoTextView
             android:id="@+id/title"
             style="@style/TextViewAppearance.Body1"
             android:layout_width="match_parent"
@@ -34,4 +34,4 @@
 
     </LinearLayout>
 
-</com.gk.erp.view.MaterialRippleLayout>
+</com.gk.chatapp.view.MaterialRippleLayout>
