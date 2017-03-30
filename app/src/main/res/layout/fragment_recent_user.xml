@@ -1,0 +1,10 @@
+<android.support.v4.widget.SwipeRefreshLayout
+    android:id="@+id/container_items"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <include
+        layout="@layout/list_view"/>
+
+</android.support.v4.widget.SwipeRefreshLayout>

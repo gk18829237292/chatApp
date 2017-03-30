@@ -39,7 +39,7 @@ public class MainActivity extends ActionBarActivity {
 
     private Handler mHandler;
 
-    private TextView txt_name,txt_depart;
+    private TextView mName, mAccount;
 
     public  Fragment fragment;
 
@@ -93,16 +93,9 @@ public class MainActivity extends ActionBarActivity {
         });
 
         View headerView = getLayoutInflater().inflate(R.layout.nav_header_main,mDrawerList,false);
-        txt_name = (TextView) headerView.findViewById(R.id.txt_name);
-        txt_depart = (TextView) headerView.findViewById(R.id.txt_depart);
-
-
-
+        mName = (TextView) headerView.findViewById(R.id.txt_name);
+        mAccount = (TextView) headerView.findViewById(R.id.txt_account);
         mDrawerList.addHeaderView(headerView);
-
-
-
-
     }
 
     private void selectItem(int position,int drawTag){
