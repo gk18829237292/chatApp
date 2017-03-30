@@ -11,7 +11,7 @@ public class ProgressDialogFactory {
 
     public static ProgressDialog getProgressDialog(Context context,String message){
         ProgressDialog dialog = new ProgressDialog(context);
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
         dialog.setMessage(message);
         return dialog;
     }

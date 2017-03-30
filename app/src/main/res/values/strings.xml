@@ -7,6 +7,10 @@
     <string name="close">close</string>
     <string name="open">open</string>
 
+    <string name="recent">最近联系</string>
+    <string name="onlineUser">在线好友</string>
+    <string name="allUser">全部好友</string>
+
     <string name="app_name">chatApp</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>

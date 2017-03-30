@@ -1,120 +1,74 @@
 package com.gk.chatapp;
 
-import android.app.Activity;
+
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
+import android.support.v7.widget.Toolbar;
+import android.widget.ListView;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Objects;
 
-public class MainActivity extends Activity {
+import com.gk.chatapp.adapter.DrawAdapter;
+import com.gk.chatapp.model.DrawerItem;
 
-    private static String serer_address = "http://10.64.33.43:3000";
-    private static Socket client;
 
-    private EditText et_title,et_content;
-    private Button btn_submit,btn_login;
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class MainActivity extends ActionBarActivity {
+
+
+    private DrawerLayout mDrawLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+    private ListView mDrawerList;
+
+    private List<DrawerItem> mDrawerItems;
+
+    private Handler mHandler;
+
+    public Fragment mFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initView();
-        initData();
+
 
     }
 
     private void initView(){
-        et_title = (EditText) findViewById(R.id.et_title);
-        et_content = (EditText) findViewById(R.id.et_content);
-        btn_submit = (Button) findViewById(R.id.btn_submit);
+        prepareNaigationDrawerItems();
 
-        btn_login = (Button) findViewById(R.id.btn_loging);
-        btn_submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("connect : " + client.connected());
-                String title = et_title.getText().toString();
-                String content = et_content.getText().toString();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-                client.emit(title,content);
-            }
-        });
+        mDrawLayout = (DrawerLayout) findViewById(R.id.layout_drawer);
+        mDrawLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        btn_login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String title = et_title.getText().toString();
-                String content = et_content.getText().toString();
+        mDrawerToggle = new ActionBarDrawerToggle(this,mDrawLayout,toolbar,R.string.open,R.string.close);
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
 
-                client.emit("login",title,content);
-            }
-        });
+        mDrawerList = (ListView) findViewById(R.id.list_view);
+        mDrawerList.setAdapter(new DrawAdapter(this,mDrawerItems));
+
+
     }
 
-    private void initData(){
-        try {
-            client = IO.socket(serer_address);
-            client.connect();
-            client.on("userInfo", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    for(Object arg:args){
-                        try {
-                            String str = new String(arg.toString().getBytes("ISO-8859-1"),"utf-8");
-                            System.out.println(str);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
-                        System.out.println(arg);
-                    }
-                }
-            });
-            client.on("disconnect", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    System.out.println("dis");
-                }
-            });
-
-            client.on("connect", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    System.out.println("connect");
-                }
-            });
-            client.on("reconnect", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    System.out.println("reconnect");
-                }
-            });
-            client.on("login", new Emitter.Listener() {
-                @Override
-                public void call(Object... args) {
-                    int result = (int) args[0];
-                    System.out.println("result : " + result);
-                    if (result == 0){
-//                        Toast.makeText(MainActivity.this,"登录失败",Toast.LENGTH_SHORT).show();
-                    }else {
-//                        Toast.makeText(MainActivity.this,"登录成功",Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+    private void prepareNaigationDrawerItems(){
+        mDrawerItems = new ArrayList<>();
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.recent, DrawerItem.DRAWER_ITEM_TAG_LIST_VIEWS));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.onlineUser, DrawerItem.DRAWER_ITEM_TAG_SHAPE_IMAGE_VIEWS));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.allUser, DrawerItem.DRAWER_ITEM_TAG_SHAPE_IMAGE_VIEWS));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_left_menus,R.string.string_logout,DrawerItem.DRAWER_ITEM_TAG_LEFT_MENUS));
     }
+
+
 
 }

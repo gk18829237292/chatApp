@@ -1,11 +1,12 @@
 package com.gk.chatapp.utils;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 
 import java.net.URISyntaxException;
 import java.util.Objects;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 /**
  * Created by ke.gao on 2017/3/28.

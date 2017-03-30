@@ -40,15 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.gk.chatapp.font.MaterialDesignIconsTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                android:text="@string/material_icon_account"
-                android:textColor="@color/main_color_grey_300"
-                android:textSize="22dp"
-                />
-            <com.gk.chatapp.view.FloatLabeledEditText
+           <com.gk.chatapp.view.FloatLabeledEditText
                 android:id="@+id/et_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -69,16 +61,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical" >
 
-            <com.gk.chatapp.font.MaterialDesignIconsTextView
-                style="@style/TextViewAppearance.Title1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                android:text="@string/material_icon_password"
-                android:textColor="@color/main_color_grey_300"
-                android:textSize="22dp"  />
-
-            <com.gk.chatapp.view.FloatLabeledEditText
+          <com.gk.chatapp.view.FloatLabeledEditText
                 android:id="@+id/et_password"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -100,17 +83,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical" >
 
-            <com.gk.chatapp.font.MaterialDesignIconsTextView
-                android:id="@+id/icon_friends"
-                style="@style/TextViewAppearance.Title1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                android:text="@string/material_icon_email"
-                android:textColor="@color/main_color_grey_300"
-                android:textSize="22dp" />
-
-            <com.gk.chatapp.view.FloatLabeledEditText
+         <com.gk.chatapp.view.FloatLabeledEditText
                 android:id="@+id/et_nickname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -130,15 +103,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical" >
 
-            <com.gk.chatapp.font.MaterialDesignIconsTextView
-                style="@style/TextViewAppearance.Title1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="0dp"
-                android:text="@string/material_icon_flag"
-                android:textColor="@color/main_color_grey_300"
-                android:textSize="22dp" />
-            <com.gk.chatapp.view.FloatLabeledEditText
+           <com.gk.chatapp.view.FloatLabeledEditText
                 android:id="@+id/et_sex"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

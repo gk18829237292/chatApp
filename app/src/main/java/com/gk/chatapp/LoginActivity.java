@@ -7,13 +7,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.github.nkzawa.emitter.Emitter;
+
 import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.utils.ProgressDialogFactory;
 import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.ToastUtils;
 import com.gk.chatapp.view.FloatLabeledEditText;
+
+import io.socket.emitter.Emitter;
 
 public class LoginActivity extends Activity {
 
