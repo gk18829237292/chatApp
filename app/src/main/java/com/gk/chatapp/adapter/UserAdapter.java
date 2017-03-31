@@ -52,19 +52,18 @@ public class UserAdapter extends BaseAdapter{
             holder = new ViewHolder();
             holder.image = (ImageView) convertView.findViewById(R.id.iv_image);
             holder.name = (TextView) convertView.findViewById(R.id.tv_name);
-            holder.time = (TextView) convertView.findViewById(R.id.tv_time);
+            holder.status = (TextView) convertView.findViewById(R.id.tv_status);
             convertView.setTag(holder);
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
         ImageUtil.displayRoundImage(holder.image,"http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg",null);
         holder.name.setText("小明 " + position);
-        holder.time.setText("2017年3月31日17:25:25");
         return convertView;
     }
 
     private class ViewHolder{
         public ImageView image;
-        public TextView name,time;
+        public TextView name,status;
     }
 }

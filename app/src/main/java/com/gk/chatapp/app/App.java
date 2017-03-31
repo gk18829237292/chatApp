@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.gk.chatapp.utils.SocketIoUtils;
+import com.gk.chatapp.utils.UserStatus;
 
 /**
  * Created by ke.gao on 2017/3/28.
@@ -24,6 +25,7 @@ public class App extends Application{
         super.onCreate();
         mInstance = this;
         SocketIoUtils.init();
+        UserStatus.init();
         Log.d(TAG,"create");
     }
 

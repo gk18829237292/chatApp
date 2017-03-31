@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 
 import com.gk.chatapp.adapter.DrawAdapter;
-import com.gk.chatapp.fragment.RecentUserFragment;
+import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
 
     private TextView mName, mAccount;
 
-//    public  Fragment fragment;
+    public  UserListFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,7 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         prepareNaigationDrawerItems();
-        init();
+        initView();
 
         //TODO 看代码 看看作用
         if(savedInstanceState == null){
@@ -61,7 +61,7 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    private void init(){
+    private void initView(){
 
         //init imageloader
         ImageLoader imageLoader = ImageLoader.getInstance();
@@ -98,25 +98,25 @@ public class MainActivity extends ActionBarActivity {
         mName = (TextView) headerView.findViewById(R.id.txt_name);
         mAccount = (TextView) headerView.findViewById(R.id.txt_account);
         mDrawerList.addHeaderView(headerView);
+
+        fragment = new UserListFragment();
+        commitFragment(fragment);
     }
 
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
     private void selectItem(int position,int drawTag){
-        Fragment fragment = getFragmentByDrawerTag(drawTag);
-        if(fragment != null){
-            commitFragment(fragment);
-            mDrawerList.setItemChecked(position, true);
-            setTitle(mDrawerItems.get(position-1).getTitle());
-            mDrawLayout.closeDrawer(mDrawerList);
-        }
+        mDrawerList.setItemChecked(position, true);
+        setTitle(mDrawerItems.get(position-1).getTitle());
+        mDrawLayout.closeDrawer(mDrawerList);
 
+        fragment.setDrawTag(drawTag);
     }
 
     private Fragment getFragmentByDrawerTag(int drawerTag) {
         Fragment fragment = null;
         switch (drawerTag){
             case DrawerItem.DRAWER_ITEM_TAG_RECENT:
-                fragment = new RecentUserFragment();
+                fragment = new UserListFragment();
                 break;
             case DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER:
 
