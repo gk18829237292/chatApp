@@ -1,12 +1,17 @@
 package com.gk.chatapp.adapter;
 
 import android.content.Context;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.gk.chatapp.R;
 import com.gk.chatapp.entry.UserEntry;
+import com.gk.chatapp.utils.ImageUtil;
 
 import java.util.List;
 
@@ -26,22 +31,40 @@ public class UserAdapter extends BaseAdapter{
 
     @Override
     public int getCount() {
-        return 0;
+        return mUserEntries.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return null;
+        return position;
     }
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return null;
+        final ViewHolder holder;
+        if(convertView == null){
+            convertView = ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.list_user_items,parent,false);
+            holder = new ViewHolder();
+            holder.image = (ImageView) convertView.findViewById(R.id.iv_image);
+            holder.name = (TextView) convertView.findViewById(R.id.tv_name);
+            holder.time = (TextView) convertView.findViewById(R.id.tv_time);
+            convertView.setTag(holder);
+        }else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+        ImageUtil.displayRoundImage(holder.image,"http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg",null);
+        holder.name.setText("小明 " + position);
+        holder.time.setText("2017年3月31日17:25:25");
+        return convertView;
     }
 
+    private class ViewHolder{
+        public ImageView image;
+        public TextView name,time;
+    }
 }

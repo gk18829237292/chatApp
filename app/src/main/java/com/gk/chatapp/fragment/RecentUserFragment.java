@@ -8,6 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.gk.chatapp.R;
@@ -25,6 +26,7 @@ public class RecentUserFragment extends Fragment implements SwipeRefreshLayout.O
     private ListView mListView;
     private List<UserEntry> mUserEntry = new ArrayList<>();
     private SwipeRefreshLayout mItemContainer;
+    private ListView userListView;
 
     private UserAdapter userAdapter;
 
@@ -35,18 +37,38 @@ public class RecentUserFragment extends Fragment implements SwipeRefreshLayout.O
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        mUserEntry.add(new UserEntry());
+        mUserEntry.add(new UserEntry());
+        mUserEntry.add(new UserEntry());
+        mUserEntry.add(new UserEntry());
+        userAdapter = new UserAdapter(getActivity(),mUserEntry);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recent_user, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_recent_user,container,false);
+
+        mItemContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.container_items);
+        mItemContainer.setOnRefreshListener(this);
+
+        userListView = (ListView) rootView.findViewById(R.id.list_view);
+        userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                userListView.setItemChecked(position,false);
+            }
+        });
+        userListView.setAdapter(userAdapter);
+
+
+        return rootView;
     }
 
     @Override
     public void onRefresh() {
 
     }
+
 }

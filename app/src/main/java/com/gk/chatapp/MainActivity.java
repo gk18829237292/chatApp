@@ -20,7 +20,10 @@ import android.widget.TextView;
 
 
 import com.gk.chatapp.adapter.DrawAdapter;
+import com.gk.chatapp.fragment.RecentUserFragment;
 import com.gk.chatapp.model.DrawerItem;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
 
     private TextView mName, mAccount;
 
-    public  Fragment fragment;
+//    public  Fragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,15 +56,19 @@ public class MainActivity extends ActionBarActivity {
             int position = 0;
             selectItem(position+1,mDrawerItems.get(position).getTag());
         }
-
         mDrawLayout.setDrawerListener(mDrawerToggle);
-
-
         //TODO 加菜单
 
     }
 
     private void init(){
+
+        //init imageloader
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        if (!imageLoader.isInited()) {
+            imageLoader.init(ImageLoaderConfiguration.createDefault(this));
+        }
+
         //TODO toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -93,6 +100,7 @@ public class MainActivity extends ActionBarActivity {
         mDrawerList.addHeaderView(headerView);
     }
 
+    //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
     private void selectItem(int position,int drawTag){
         Fragment fragment = getFragmentByDrawerTag(drawTag);
         if(fragment != null){
@@ -105,18 +113,19 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private Fragment getFragmentByDrawerTag(int drawerTag) {
-
+        Fragment fragment = null;
         switch (drawerTag){
-            case DrawerItem.DRAWER_ITEM_TAG_LIST_VIEWS:
+            case DrawerItem.DRAWER_ITEM_TAG_RECENT:
+                fragment = new RecentUserFragment();
                 break;
-            case DrawerItem.DRAWER_ITEM_TAG_SHAPE_IMAGE_VIEWS:
+            case DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER:
+
                 break;
-            case DrawerItem.DRAWER_ITEM_TAG_LEFT_MENUS:
-                //TODO
-                Intent intent= new Intent(MainActivity.this,LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                intent.putExtra("flag",true);
-                startActivity(intent);
+            case DrawerItem.DRAWER_ITEM_TAG_ALLUSER:
+
+                break;
+            case DrawerItem.DRAWER_ITEM_TAG_LOGOUT:
+                logout();
                 break;
         }
         return  fragment;
@@ -132,10 +141,10 @@ public class MainActivity extends ActionBarActivity {
     //TODO 这里实例化填充的东西
     private void prepareNaigationDrawerItems(){
         mDrawerItems = new ArrayList<>();
-        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.recent, DrawerItem.DRAWER_ITEM_TAG_LIST_VIEWS));
-        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.onlineUser, DrawerItem.DRAWER_ITEM_TAG_LIST_VIEWS));
-        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.allUser, DrawerItem.DRAWER_ITEM_TAG_SHAPE_IMAGE_VIEWS));
-        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_left_menus,R.string.string_logout,DrawerItem.DRAWER_ITEM_TAG_LEFT_MENUS));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.recent, DrawerItem.DRAWER_ITEM_TAG_RECENT));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.onlineUser, DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.allUser, DrawerItem.DRAWER_ITEM_TAG_ALLUSER));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_left_menus,R.string.string_logout,DrawerItem.DRAWER_ITEM_TAG_LOGOUT));
     }
 
     private class CommitFragmentRunnable implements Runnable {
@@ -179,6 +188,13 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void logout(){
+        Intent intent= new Intent(MainActivity.this,LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("flag",true);
+        startActivity(intent);
     }
 
 }

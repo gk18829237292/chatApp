@@ -24,7 +24,13 @@ public class DrawerItem {
 	public static final int DRAWER_ITEM_TAG_BLOG = 27;
 	public static final int DRAWER_ITEM_TAG_GIT_HUB = 28;
 	public static final int DRAWER_ITEM_TAG_INSTAGRAM = 29;
-	
+
+	public static final int DRAWER_ITEM_TAG_RECENT=30;
+	public static final int DRAWER_ITEM_TAG_ONLINEUSER=31;
+	public static final int DRAWER_ITEM_TAG_ALLUSER=32;
+	public static final int DRAWER_ITEM_TAG_LOGOUT=33;
+
+
 	public DrawerItem(int icon, int title, int tag) {
 		this.icon = icon;
 		this.title = title;
