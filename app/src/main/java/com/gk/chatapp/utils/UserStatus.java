@@ -63,6 +63,8 @@ public class UserStatus {
                 onLogout(account);
             }
         });
+
+        SocketIoUtils.sendMessage("getAllUser","");
     }
 
     public static void onNewUser(UserEntry userEntry){
