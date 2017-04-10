@@ -3,13 +3,16 @@ package com.gk.chatapp;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.icu.text.LocaleDisplayNames;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 
 import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
+import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.utils.ProgressDialogFactory;
 import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.ToastUtils;
@@ -68,22 +71,35 @@ public class LoginActivity extends Activity {
 
     private void initData(){
 
+        //注册监听页面
         SocketIoUtils.registerListener(Constant.LOGIN_RESULT, new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                final boolean result = (boolean) args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(result){
-                            loginSuccess();
-                        }else {
-                            loginFail();
-                        }
-                    }
-                });
+                boolean result = (boolean) args[0];
+                if(result){
+                    //登录成功，返回 账户名，昵称，签名，（照片再说）
+                    UserEntry user = new UserEntry((String) args[1],(String)args[2],(String)args[3],true);
+                    App.getInstance().setMyEntry(user);
+                    Log.d(TAG,App.getInstance().getMyEntry().toString());
+                    loginSuccess();
+                }else {
+                    loginFail();
+                }
+
             }
         });
+
+        //获取
+        Intent intent = getIntent();
+        account = intent.getStringExtra(Constant.ACCOUNT);
+        password = intent.getStringExtra(Constant.PASSWORD);
+        Log.d(TAG,"account : " + account);
+        Log.d(TAG,"password : " + password);
+        if (account != null && password != null){
+            tv_account.setText(account);
+            tv_password.setText(password);
+        }
+
     }
 
     private boolean checkAccount(){
@@ -119,13 +135,34 @@ public class LoginActivity extends Activity {
     }
 
     private void loginSuccess(){
-        hideDialog();
-        ToastUtils.showShortToast(LoginActivity.this,"登录成功");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideDialog();
+                ToastUtils.showShortToast(LoginActivity.this,"登录成功");
+                SocketIoUtils.unRegisterListener(Constant.LOGIN_RESULT);
+                Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void loginFail(){
-        hideDialog();
-        ToastUtils.showShortToast(LoginActivity.this,"登录失败");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideDialog();
+                ToastUtils.showShortToast(LoginActivity.this,"登录失败");
+            }
+        });
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SocketIoUtils.unRegisterListener(Constant.LOGIN_RESULT);
+    }
 }

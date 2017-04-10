@@ -1,14 +1,25 @@
 package com.gk.chatapp.utils;
 
+import android.nfc.Tag;
+import android.util.Log;
+
+import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringTokenizer;
 
 import io.socket.emitter.Emitter;
@@ -18,6 +29,8 @@ import io.socket.emitter.Emitter;
  */
 
 public class UserStatus {
+
+    private static final String TAG = "UserStatus";
 
     public static final Map<String,UserEntry> recentUserList = new HashMap<>();
     public static final Map<String,UserEntry> onLineUserList = new HashMap<>();
@@ -61,6 +74,33 @@ public class UserStatus {
             public void call(Object... args) {
                 String account = (String) args[0];
                 onLogout(account);
+            }
+        });
+
+        SocketIoUtils.registerListener("getAllUser_result", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    JSONArray jsonArray = new JSONArray(args[0].toString());
+                    for(int i =0;i<jsonArray.length();i++){
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),false);
+                        allUserList.put(entry.getAccount(),entry);
+                    }
+                    SocketIoUtils.sendMessage("getAllUserOnline","");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        SocketIoUtils.registerListener("getAllUserOnline_result", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String[] onlineUsers= (String[]) args[0];
+                for(String account:onlineUsers){
+                    onLineUserList.put(account,allUserList.get(account));
+                }
             }
         });
 

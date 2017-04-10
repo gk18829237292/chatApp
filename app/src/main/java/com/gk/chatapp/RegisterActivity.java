@@ -2,6 +2,7 @@ package com.gk.chatapp;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -22,11 +23,11 @@ public class RegisterActivity extends Activity {
 
     private static ProgressDialog pDialog;
 
-    private FloatLabeledEditText et_account,et_password,et_nickName,et_sex;
+    private FloatLabeledEditText et_account,et_password,et_nickname,et_signuture;
 
     private TextView tv_register;
 
-    private String account,password,nickName,sex;
+    private String account,password,nickname, signature;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +43,8 @@ public class RegisterActivity extends Activity {
 
         et_account = (FloatLabeledEditText) findViewById(R.id.et_account);
         et_password = (FloatLabeledEditText) findViewById(R.id.et_password);
-        et_nickName = (FloatLabeledEditText) findViewById(R.id.et_nickname);
-        et_sex = (FloatLabeledEditText) findViewById(R.id.et_sex);
+        et_nickname = (FloatLabeledEditText) findViewById(R.id.et_nickname);
+        et_signuture = (FloatLabeledEditText) findViewById(R.id.et_signature);
 
         tv_register = (TextView) findViewById(R.id.tv_register);
         tv_register.setOnClickListener(new View.OnClickListener() {
@@ -51,9 +52,9 @@ public class RegisterActivity extends Activity {
             public void onClick(View v) {
                 if(!App.getInstance().isConnected()){
                     ToastUtils.showShortToast(RegisterActivity.this,"请检查网络连接");
-                }else if(checkAccount() && checkPassword() && checkNickName() && checkSex()){
+                }else if(checkAccount() && checkPassword() && checkNickname() &&checkSignature() ){
                     showDialog();
-                    SocketIoUtils.sendMessage("register",account,password,nickName,sex);
+                    SocketIoUtils.sendMessage("register",account,password,nickname,signature);
                 }
             }
         });
@@ -64,16 +65,12 @@ public class RegisterActivity extends Activity {
             @Override
             public void call(Object... args) {
                 final boolean result = (boolean) args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(result){
-                            registerSuccess();
-                        }else {
-                            registerFail();
-                        }
-                    }
-                });
+                if (result){
+                    registerSuccess();
+                }else {
+                    registerFail();
+                }
+
             }
         });
     }
@@ -98,25 +95,27 @@ public class RegisterActivity extends Activity {
         return true;
     }
 
-    private boolean checkNickName(){
-        nickName = et_nickName.getText().toString();
-        et_nickName.setError(null);
-        if(nickName.length() == 0){
-            et_nickName.setError("昵称不可为空");
+    private boolean checkNickname(){
+        nickname = et_nickname.getTextString();
+        et_nickname.setError(null);
+        if(nickname.length() ==0){
+            et_nickname.setError("昵称不可为空");
             return false;
         }
         return true;
     }
 
-    private boolean checkSex(){
-        sex = et_sex.getText().toString();
-        et_sex.setError(null);
-        if(sex.length() == 0){
-            et_sex.setError("性别不可为空");
+    private boolean checkSignature(){
+        signature = et_signuture.getText().toString();
+        et_signuture.setError(null);
+        if(signature.length() == 0){
+            et_signuture.setError("个性签名不可为空");
             return false;
         }
         return true;
     }
+
+
 
     private void showDialog(){
         if(!pDialog.isShowing()){
@@ -131,14 +130,36 @@ public class RegisterActivity extends Activity {
     }
 
     private void registerSuccess(){
-        hideDialog();
-        ToastUtils.showShortToast(RegisterActivity.this,"注册成功");
-        //返回登录界面
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideDialog();
+                ToastUtils.showShortToast(RegisterActivity.this,"注册成功");
+                //返回登录界面
+                Intent intent = new Intent(RegisterActivity.this,LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                intent.putExtra(Constant.ACCOUNT,account);
+                intent.putExtra(Constant.PASSWORD,password);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void registerFail(){
-        hideDialog();
-        ToastUtils.showShortToast(RegisterActivity.this,"注册失败，请检查用户名唯一性");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideDialog();
+                ToastUtils.showShortToast(RegisterActivity.this,"注册失败，请检查用户名唯一性");
+            }
+        });
+
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SocketIoUtils.unRegisterListener(Constant.REGISTER_RESULT);
+    }
 }

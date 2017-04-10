@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.UserStatus;
 
@@ -19,6 +20,8 @@ public class App extends Application{
 
     private static App mInstance;
     public static synchronized App getInstance(){return mInstance;}
+
+    public UserEntry myEntry;
 
     @Override
     public void onCreate() {
@@ -36,5 +39,13 @@ public class App extends Application{
             return  true;
         }
         return  false;
+    }
+
+    public UserEntry getMyEntry() {
+        return myEntry;
+    }
+
+    public void setMyEntry(UserEntry myEntry) {
+        this.myEntry = myEntry;
     }
 }

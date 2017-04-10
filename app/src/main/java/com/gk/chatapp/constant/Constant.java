@@ -13,4 +13,8 @@ public class Constant {
     public static final String REGISTER_RESULT="register_result";
     public static final String REGISTER_EVENT="register";
 
+    public static final String ACCOUNT="account";
+    public static final String PASSWORD="password";
+    public static final String NICKNAME="nickname";
+    public static final String SIGNATURE="signature";
 }

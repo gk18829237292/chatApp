@@ -30,6 +30,14 @@ public class SocketIoUtils {
         client.on(event,listener);
     }
 
+    public static void unRegisterListener(String event){
+        client.off(event);
+    }
+
+    public static void unRegisterListener(String event, Emitter.Listener listener){
+        client.off(event,listener);
+    }
+
     public static synchronized void sendMessage(String event, Object... args){
         client.emit(event,args);
     }

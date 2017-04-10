@@ -53,4 +53,14 @@ public class UserEntry {
     public void setSignature(String signature) {
         this.signature = signature;
     }
+
+    @Override
+    public String toString() {
+        return "UserEntry{" +
+                "account='" + account + '\'' +
+                ", nickName='" + nickName + '\'' +
+                ", signature='" + signature + '\'' +
+                ", onLine=" + onLine +
+                '}';
+    }
 }

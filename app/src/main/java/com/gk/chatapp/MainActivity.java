@@ -20,13 +20,17 @@ import android.widget.TextView;
 
 
 import com.gk.chatapp.adapter.DrawAdapter;
+import com.gk.chatapp.app.App;
 import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
+import com.gk.chatapp.utils.SprefUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.gk.chatapp.model.DrawerItem.DRAWER_ITEM_TAG_LOGOUT;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -39,9 +43,9 @@ public class MainActivity extends ActionBarActivity {
 
     private Handler mHandler;
 
-    private TextView mName, mAccount;
+    private TextView tv_nickName, tv_signature;
 
-    public  UserListFragment fragment;
+    public UserListFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,40 +99,36 @@ public class MainActivity extends ActionBarActivity {
         });
 
         View headerView = getLayoutInflater().inflate(R.layout.nav_header_main,mDrawerList,false);
-        mName = (TextView) headerView.findViewById(R.id.txt_name);
-        mAccount = (TextView) headerView.findViewById(R.id.txt_account);
+
+        tv_nickName= (TextView) headerView.findViewById(R.id.tv_nickName);
+        tv_signature= (TextView) headerView.findViewById(R.id.tv_signature);
+
+
         mDrawerList.addHeaderView(headerView);
 
         fragment = new UserListFragment();
         commitFragment(fragment);
+
+        //侧边栏部分
+        tv_nickName.setText(App.getInstance().getMyEntry().getNickName());
+        tv_signature.setText(App.getInstance().getMyEntry().getSignature());
+    }
+
+    private void initData(){
+
+
     }
 
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
     private void selectItem(int position,int drawTag){
+        if (drawTag == DRAWER_ITEM_TAG_LOGOUT){
+            logout();
+            return;
+        }
         mDrawerList.setItemChecked(position, true);
         setTitle(mDrawerItems.get(position-1).getTitle());
         mDrawLayout.closeDrawer(mDrawerList);
-
         fragment.setDrawTag(drawTag);
-    }
-
-    private Fragment getFragmentByDrawerTag(int drawerTag) {
-        Fragment fragment = null;
-        switch (drawerTag){
-            case DrawerItem.DRAWER_ITEM_TAG_RECENT:
-                fragment = new UserListFragment();
-                break;
-            case DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER:
-
-                break;
-            case DrawerItem.DRAWER_ITEM_TAG_ALLUSER:
-
-                break;
-            case DrawerItem.DRAWER_ITEM_TAG_LOGOUT:
-                logout();
-                break;
-        }
-        return  fragment;
     }
 
     public void commitFragment(Fragment fragment) {
@@ -144,7 +144,7 @@ public class MainActivity extends ActionBarActivity {
         mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.recent, DrawerItem.DRAWER_ITEM_TAG_RECENT));
         mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.onlineUser, DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER));
         mDrawerItems.add(new DrawerItem(R.string.drawer_icon_shape_image_views, R.string.allUser, DrawerItem.DRAWER_ITEM_TAG_ALLUSER));
-        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_left_menus,R.string.string_logout,DrawerItem.DRAWER_ITEM_TAG_LOGOUT));
+        mDrawerItems.add(new DrawerItem(R.string.drawer_icon_left_menus,R.string.string_logout, DRAWER_ITEM_TAG_LOGOUT));
     }
 
     private class CommitFragmentRunnable implements Runnable {

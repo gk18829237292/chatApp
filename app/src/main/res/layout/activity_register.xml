@@ -97,19 +97,19 @@
             </com.gk.chatapp.view.FloatLabeledEditText>
         </LinearLayout>
 
-        <!--sex-->
+        <!--signature-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical" >
 
-           <com.gk.chatapp.view.FloatLabeledEditText
-                android:id="@+id/et_sex"
+            <com.gk.chatapp.view.FloatLabeledEditText
+                android:id="@+id/et_signature"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_weight="1"
-                app:fletFloatingHint="@string/sex"
+                app:fletFloatingHint="@string/signature"
                 app:fletHintTextColor="@color/main_color_grey_300"
                 app:fletSingleLine="true"
                 app:fletTextBackground="@drawable/edit_text_background_accent"

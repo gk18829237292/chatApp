@@ -70,7 +70,8 @@
             app:fletHintTextColor="@color/main_color_500"
             app:fletSingleLine="true"
             app:fletTextBackground="@drawable/edit_text_background_accent"
-            app:fletTextColor="@color/main_color_grey_400" />
+            app:fletTextColor="@color/main_color_grey_400"
+            />
     </LinearLayout>
 
     <LinearLayout
