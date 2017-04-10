@@ -12,142 +12,142 @@
     android:background="@color/main_color_grey_200"
     tools:context="com.gk.chatapp.UserInfoActivity">
     <LinearLayout
-        android:id="@+id/activity_task_add"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_gravity="center_horizontal">
-        <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="@color/main_color_grey_50"
-        android:layout_gravity="center_horizontal">
-        <!--头像-->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="6dp"
-            >
-            <TextView
-                android:text="头像："
-                android:layout_centerVertical="true"
-                android:layout_width="wrap_content"
-                android:textSize="18sp"
-                android:layout_height="wrap_content" />
 
-            <ImageView
-                android:id="@+id/iv_image"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="6dp"
-                android:layout_gravity="right"
-                android:gravity="right"
+        <LinearLayout
+            android:id="@+id/ll_userinfo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@color/main_color_grey_50"
+            android:layout_gravity="center_horizontal">
+            <!--头像-->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                >
+                <TextView
+                    android:text="头像："
+                    android:layout_centerVertical="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <ImageView
+                    android:id="@+id/iv_image"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="6dp"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    />
+
+            </RelativeLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/main_color_grey_400"
+                ></View>
+
+            <!--账号-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                >
+                <TextView
+                    android:text="账号："
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/txt_place"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:layout_gravity="end"
+                    android:hint="1260944980" />
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/main_color_grey_400"
                 />
 
-        </RelativeLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/main_color_grey_400"
-            ></View>
-
-        <!--账号-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="6dp"
-            >
-            <TextView
-                android:text="账号："
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/txt_place"
+            <!--昵称-->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="right"
-                android:layout_gravity="end"
-                android:hint="1260944980" />
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/main_color_grey_400"
-            />
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                >
+                <TextView
+                    android:text="昵称："
+                    android:padding="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-        <!--昵称-->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            >
-            <TextView
-                android:text="任务地点："
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:layout_gravity="end"
+                    android:hint="请输入昵称"
+                    android:background="@null" />
+            </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/main_color_grey_400"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:padding="6dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+                <TextView
+                    android:text="个性签名："
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:layout_gravity="end"
-                android:hint="请输入任务地点"
-                android:background="@null" />
+                <EditText
+                    android:id="@+id/txt_goal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:layout_marginTop="10dp"
+                    android:inputType="textMultiLine"
+                    android:minLines="4"
+                    android:scrollbars="vertical"
+                    android:layout_gravity="end"
+                    android:hint="请输入个性签名"
+                    android:background="@android:drawable/edit_text" />
+            </LinearLayout>
+
         </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/main_color_grey_400"
-            />
 
         <LinearLayout
+            android:layout_marginTop="20dp"
+            android:background="@color/main_color_grey_50"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="6dp"
-            android:gravity="center_vertical"
             android:orientation="vertical">
-            <TextView
-                android:text="任务目标："
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <EditText
-                android:id="@+id/txt_goal"
+            <Button
+                android:id="@+id/btn_change"
+                android:text="编辑"
+                android:textSize="25sp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="top"
-                android:layout_marginTop="10dp"
-                android:inputType="textMultiLine"
-                android:minLines="4"
-                android:scrollbars="vertical"
-                android:layout_gravity="end"
-                android:hint="请输入任务目标"
-                android:background="@android:drawable/edit_text" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
-
-    </LinearLayout>
-
-        <LinearLayout
-        android:layout_marginTop="20dp"
-        android:background="@color/main_color_grey_50"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <Button
-            android:id="@+id/btn_submit"
-            android:text="提交"
-            android:textSize="25sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
     </LinearLayout>
 </ScrollView>
