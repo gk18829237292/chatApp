@@ -17,4 +17,6 @@ public class Constant {
     public static final String PASSWORD="password";
     public static final String NICKNAME="nickname";
     public static final String SIGNATURE="signature";
+
+    public static final String RECENTUSER="recentUser";
 }

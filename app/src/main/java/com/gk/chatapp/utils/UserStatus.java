@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import io.socket.emitter.Emitter;
@@ -97,10 +98,21 @@ public class UserStatus {
         SocketIoUtils.registerListener("getAllUserOnline_result", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                String[] onlineUsers= (String[]) args[0];
-                for(String account:onlineUsers){
-                    onLineUserList.put(account,allUserList.get(account));
+                try {
+                    JSONArray jsonArray = new JSONArray(args[0].toString());
+                    for(int i = 0; i< jsonArray.length();i++){
+                        String account = jsonArray.getString(i);
+                        allUserList.get(account).setOnLine(true);
+                        onLineUserList.put(account,allUserList.get(account));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+//                String[] onlineUsers= args[0].toString().split();
+//                for(String account:onlineUsers){
+//                    allUserList.get(account).setOnLine(true);
+//                    onLineUserList.put(account,allUserList.get(account));
+//                }
             }
         });
 
@@ -126,6 +138,14 @@ public class UserStatus {
         }
     }
 
+    public static void addRecentUser(String account){
+        recentUserList.put(account,allUserList.get(account));
+    }
 
+    public static void addRecentUser(Set<String> accounts){
+        for(String account:accounts){
+            addRecentUser(account);
+        }
+    }
 
 }

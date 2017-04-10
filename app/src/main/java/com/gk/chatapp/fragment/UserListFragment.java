@@ -42,10 +42,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUserEntry.add(new UserEntry());
-        mUserEntry.add(new UserEntry());
-        mUserEntry.add(new UserEntry());
-        mUserEntry.add(new UserEntry());
+        mUserEntry.addAll(UserStatus.getUserList(DrawerItem.DRAWER_ITEM_TAG_RECENT));
         userAdapter = new UserAdapter(getActivity(),mUserEntry);
     }
 

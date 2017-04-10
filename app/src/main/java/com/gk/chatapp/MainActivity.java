@@ -21,14 +21,17 @@ import android.widget.TextView;
 
 import com.gk.chatapp.adapter.DrawAdapter;
 import com.gk.chatapp.app.App;
+import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
 import com.gk.chatapp.utils.SprefUtils;
+import com.gk.chatapp.utils.UserStatus;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.gk.chatapp.model.DrawerItem.DRAWER_ITEM_TAG_LOGOUT;
 
@@ -38,6 +41,7 @@ public class MainActivity extends ActionBarActivity {
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
 
+    private SprefUtils mSpref;
 
     private List<DrawerItem> mDrawerItems;
 
@@ -115,8 +119,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void initData(){
-
-
+        mSpref = new SprefUtils(this);
+        Set<String> users = mSpref.getStringSet(Constant.RECENTUSER,null);
+        UserStatus.addRecentUser(users);
     }
 
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
