@@ -3,6 +3,7 @@ package com.gk.chatapp.utils;
 import android.nfc.Tag;
 import android.util.Log;
 
+import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.fragment.UserListFragment;
@@ -62,18 +63,20 @@ public class UserStatus {
             }
         });
 
-        SocketIoUtils.registerListener("login", new Emitter.Listener() {
+        SocketIoUtils.registerListener("login_client", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 String account = (String) args[0];
+                Log.d(TAG,account +" login");
                 onLogin(account);
             }
         });
 
-        SocketIoUtils.registerListener("logout", new Emitter.Listener() {
+        SocketIoUtils.registerListener("logout_client", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 String account = (String) args[0];
+                Log.d(TAG,account +" logout");
                 onLogout(account);
             }
         });
@@ -102,17 +105,15 @@ public class UserStatus {
                     JSONArray jsonArray = new JSONArray(args[0].toString());
                     for(int i = 0; i< jsonArray.length();i++){
                         String account = jsonArray.getString(i);
+                        if(!allUserList.containsKey(account)) {
+                            continue;
+                        }
                         allUserList.get(account).setOnLine(true);
                         onLineUserList.put(account,allUserList.get(account));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-//                String[] onlineUsers= args[0].toString().split();
-//                for(String account:onlineUsers){
-//                    allUserList.get(account).setOnLine(true);
-//                    onLineUserList.put(account,allUserList.get(account));
-//                }
             }
         });
 
@@ -145,6 +146,15 @@ public class UserStatus {
     public static void addRecentUser(Set<String> accounts){
         for(String account:accounts){
             addRecentUser(account);
+        }
+    }
+
+    public static void removeMySelf(){
+        if(App.getInstance().getMyEntry() != null){
+            String account = App.getInstance().getMyEntry().getAccount();
+            if(allUserList.containsKey(account)) allUserList.remove(account);
+            if(onLineUserList.containsKey(account)) onLineUserList.remove(account);
+            if(recentUserList.containsKey(account)) recentUserList.remove(account);
         }
     }
 

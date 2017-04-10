@@ -53,17 +53,25 @@ public class UserAdapter extends BaseAdapter{
             holder.image = (ImageView) convertView.findViewById(R.id.iv_image);
             holder.name = (TextView) convertView.findViewById(R.id.tv_name);
             holder.status = (TextView) convertView.findViewById(R.id.tv_status);
+            holder.signature = (TextView) convertView.findViewById(R.id.tv_signature);
             convertView.setTag(holder);
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
         ImageUtil.displayRoundImage(holder.image,"http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg",null);
-        holder.name.setText("小明 " + position);
+        UserEntry entry = mUserEntries.get(position);
+        holder.name.setText(entry.getNickName());
+        holder.signature.setText(entry.getSignature());
+        if(entry.isOnLine()){
+            holder.status.setText("[在线]");
+        }else {
+            holder.status.setText("[离线]");
+        }
         return convertView;
     }
 
     private class ViewHolder{
         public ImageView image;
-        public TextView name,status;
+        public TextView name,status,signature;
     }
 }
