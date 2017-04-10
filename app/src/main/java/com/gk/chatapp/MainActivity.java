@@ -98,6 +98,9 @@ public class MainActivity extends ActionBarActivity {
                 System.out.println("click : "+ i);
                 if(i > 0){
                     selectItem(i,mDrawerItems.get(i-1).getTag());
+                }else{
+                    Intent intent = new Intent(MainActivity.this,UserInfoActivity.class);
+                    startActivityForResult(intent,1);
                 }
             }
         });
