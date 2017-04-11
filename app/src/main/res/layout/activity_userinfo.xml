@@ -69,12 +69,12 @@
                     android:layout_height="wrap_content" />
 
                 <TextView
-                    android:id="@+id/txt_place"
+                    android:id="@+id/tv_account"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="right"
                     android:layout_gravity="end"
-                    android:hint="1260944980" />
+                    android:hint="-----" />
             </LinearLayout>
             <View
                 android:layout_width="match_parent"
@@ -96,11 +96,11 @@
                     android:layout_height="wrap_content" />
 
                 <EditText
+                    android:id="@+id/et_nickname"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="right"
                     android:layout_gravity="end"
-                    android:hint="请输入昵称"
                     android:background="@null" />
             </LinearLayout>
             <View
@@ -121,7 +121,7 @@
                     android:layout_height="wrap_content" />
 
                 <EditText
-                    android:id="@+id/txt_goal"
+                    android:id="@+id/et_signature"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
@@ -130,24 +130,19 @@
                     android:minLines="4"
                     android:scrollbars="vertical"
                     android:layout_gravity="end"
-                    android:hint="请输入个性签名"
                     android:background="@android:drawable/edit_text" />
             </LinearLayout>
 
         </LinearLayout>
 
-        <LinearLayout
+
+        <Button
             android:layout_marginTop="20dp"
-            android:background="@color/main_color_grey_50"
+            android:id="@+id/btn_change"
+            android:text="编辑"
+            android:textSize="25sp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <Button
-                android:id="@+id/btn_change"
-                android:text="编辑"
-                android:textSize="25sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:layout_height="wrap_content" />
+
     </LinearLayout>
 </ScrollView>

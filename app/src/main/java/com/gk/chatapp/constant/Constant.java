@@ -19,4 +19,10 @@ public class Constant {
     public static final String SIGNATURE="signature";
 
     public static final String RECENTUSER="recentUser";
+
+    public static final String URL_STRING="URL";
+    public static final String DEF_URL ="http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg";
+
+    public static final String CAN_EDIT="editFlag";
+
 }
