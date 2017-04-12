@@ -1,6 +1,7 @@
 package com.gk.chatapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -28,8 +29,11 @@ import android.widget.TextView;
 
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.utils.ImageUtil;
+import com.gk.chatapp.utils.ProgressDialogFactory;
 import com.gk.chatapp.utils.SocketIoUtils;
+import com.gk.chatapp.utils.ToastUtils;
 import com.gk.chatapp.utils.UploadUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.qiniu.android.http.ResponseInfo;
 import com.qiniu.android.storage.UpCompletionHandler;
 
@@ -63,6 +67,8 @@ public class UserInfoActivity extends ActionBarActivity {
 
     PopupWindow pop;
     LinearLayout ll_popup;
+
+    private ProgressDialog mPdialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +136,8 @@ public class UserInfoActivity extends ActionBarActivity {
             }
         });
 
+        mPdialog = ProgressDialogFactory.getProgressDialog(UserInfoActivity.this,"上传中");
+
     }
 
     private void initData(){
@@ -143,7 +151,7 @@ public class UserInfoActivity extends ActionBarActivity {
                         Log.d(TAG,"key is : " + key);
                         if(info.isOK()){
                             Log.d(TAG,"success");
-                            uploadSuccess();
+                            uploadSuccess(key);
                         }else if(info.needRetry()){
                             Log.d(TAG,"failed  needRetry " + info.toString());
                             uploadFailed();
@@ -179,6 +187,7 @@ public class UserInfoActivity extends ActionBarActivity {
         });
         bt1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                showDialog();
                 Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 filePath = Environment.getExternalStorageDirectory() +"/" + System.currentTimeMillis() + ".jpg";
                 camera.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(new File(filePath)));
@@ -199,7 +208,6 @@ public class UserInfoActivity extends ActionBarActivity {
         });
         bt3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                pop.dismiss();
                 ll_popup.clearAnimation();
             }
         });
@@ -229,6 +237,7 @@ public class UserInfoActivity extends ActionBarActivity {
         }
         this.key = System.currentTimeMillis() +".jpg";
         SocketIoUtils.sendMessage("getToken",Constant.BUCKET_STR,key);
+        showDialog();
     }
 
 
@@ -242,17 +251,38 @@ public class UserInfoActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void uploadSuccess(){
+    private void uploadSuccess(final String fileName){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
+                hideDialog();
+                ToastUtils.showShortToast(getApplicationContext(),"上传成功");
+                ImageUtil.displayRoundImage(iv_image,Constant.IMG_BASEURL_STR+fileName,null);
             }
         });
     }
 
     private void uploadFailed(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideDialog();
+                ToastUtils.showShortToast(getApplicationContext(),"上传失败");
+            }
+        });
 
+    }
+
+    private void showDialog(){
+        if(!mPdialog.isShowing()){
+            mPdialog.show();
+        }
+    }
+
+    private void hideDialog(){
+        if(mPdialog.isShowing()){
+            mPdialog.dismiss();
+        }
     }
 
 }

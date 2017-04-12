@@ -22,9 +22,11 @@ public class Constant {
 
     public static final String URL_STRING="URL";
     public static final String DEF_URL ="http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg";
+    public static final String IMG_BASEURL_STR="http://ooaptg3q1.bkt.clouddn.com/";
 
     public static final String CAN_EDIT="editFlag";
     public static final String BUCKET_STR="chatapp";
+
 
     public static final int CAMERA_INT=1;
     public static final int PICTURE_INT=2;
