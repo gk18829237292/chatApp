@@ -1,12 +1,20 @@
 package com.gk.chatapp;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
@@ -20,17 +28,38 @@ import android.widget.TextView;
 
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.utils.ImageUtil;
+import com.gk.chatapp.utils.SocketIoUtils;
+import com.gk.chatapp.utils.UploadUtils;
+import com.qiniu.android.http.ResponseInfo;
+import com.qiniu.android.storage.UpCompletionHandler;
 
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.lang.annotation.Target;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
+import io.socket.emitter.Emitter;
 
 public class UserInfoActivity extends ActionBarActivity {
 
     private static final String TAG = "UserInfoActivity";
+    private String token = null;
+    private String key =null;
+
 
     private ImageView iv_image;
     private TextView tv_account;
     private EditText et_nickname, et_signature;
     private Button btn_change;
+
+    private String filePath;
 
     PopupWindow pop;
     LinearLayout ll_popup;
@@ -68,7 +97,7 @@ public class UserInfoActivity extends ActionBarActivity {
         ImageUtil.displayRoundImage(iv_image,url,null);
 
         boolean flag = intent.getBooleanExtra(Constant.CAN_EDIT,false);
-        if(flag){
+        if(!flag){
             changeEnable(true);
             btn_change.setVisibility(View.VISIBLE);
         }else {
@@ -85,7 +114,6 @@ public class UserInfoActivity extends ActionBarActivity {
                     changeEnable(true);
                 }else{
                     btn_change.setText("编辑");
-                    //执行更新操作
 
                 }
             }
@@ -105,13 +133,27 @@ public class UserInfoActivity extends ActionBarActivity {
     }
 
     private void initData(){
-
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+        SocketIoUtils.registerListener("token_result", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                token = (String) args[0];
+                UploadUtils.getUploadManager().put(filePath, key, token, new UpCompletionHandler() {
+                    @Override
+                    public void complete(String key, ResponseInfo info, JSONObject response) {
+                        Log.d(TAG,"key is : " + key);
+                        if(info.isOK()){
+                            Log.d(TAG,"success");
+                            uploadSuccess();
+                        }else if(info.needRetry()){
+                            Log.d(TAG,"failed  needRetry " + info.toString());
+                            uploadFailed();
+                        }else {
+                            Log.d(TAG,"failed  " + info.toString());
+                        }
+                    }
+                },null);
+            }
+        });
     }
 
     public void showPopupWindow(){
@@ -138,7 +180,9 @@ public class UserInfoActivity extends ActionBarActivity {
         bt1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(camera, 1);
+                filePath = Environment.getExternalStorageDirectory() +"/" + System.currentTimeMillis() + ".jpg";
+                camera.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(new File(filePath)));
+                startActivityForResult(camera, Constant.CAMERA_INT);
                 pop.dismiss();
                 ll_popup.clearAnimation();
             }
@@ -148,7 +192,7 @@ public class UserInfoActivity extends ActionBarActivity {
                 Intent picture = new Intent(
                         Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(picture, 2);
+                startActivityForResult(picture, Constant.PICTURE_INT);
                 pop.dismiss();
                 ll_popup.clearAnimation();
             }
@@ -168,4 +212,47 @@ public class UserInfoActivity extends ActionBarActivity {
         et_signature.setEnabled(flag);
 
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == Activity.RESULT_CANCELED){
+            return;
+        }
+        if(requestCode == Constant.PICTURE_INT){
+            Uri uri = data.getData();
+            Cursor cursor = getContentResolver().query(uri, null, null, null,null);
+            if (cursor != null && cursor.moveToFirst()) {
+                filePath= cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+            }
+
+        }
+        this.key = System.currentTimeMillis() +".jpg";
+        SocketIoUtils.sendMessage("getToken",Constant.BUCKET_STR,key);
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == android.R.id.home){
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void uploadSuccess(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        });
+    }
+
+    private void uploadFailed(){
+
+    }
+
 }

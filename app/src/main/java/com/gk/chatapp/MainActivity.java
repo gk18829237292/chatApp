@@ -117,8 +117,10 @@ public class MainActivity extends ActionBarActivity {
         commitFragment(fragment);
 
         //侧边栏部分
-        tv_nickName.setText(App.getInstance().getMyEntry().getNickName());
-        tv_signature.setText(App.getInstance().getMyEntry().getSignature());
+        if(App.getInstance().getMyEntry() != null){
+            tv_nickName.setText(App.getInstance().getMyEntry().getNickName());
+            tv_signature.setText(App.getInstance().getMyEntry().getSignature());
+        }
     }
 
     private void initData(){
