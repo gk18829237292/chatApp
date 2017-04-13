@@ -92,21 +92,17 @@ public class UserStatus {
             }
         });
 
-        SocketIoUtils.registerListener("getAllUserOnline_result", new Emitter.Listener() {
+        SocketIoUtils.registerListener("userUpdate_result", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                try {
-                    JSONArray jsonArray = new JSONArray(args[0].toString());
-                    for(int i = 0; i< jsonArray.length();i++){
-                        String account = jsonArray.getString(i);
-                        if(!allUserList.containsKey(account)) {
-                            continue;
-                        }
-                        allUserList.get(account).setOnLine(true);
-                        onLineUserList.put(account,allUserList.get(account));
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                String account = (String) args[0];
+                if(allUserList.containsKey(account)){
+                    String nickName = (String) args[1];
+                    String signature = (String) args[2];
+                    String image= (String) args[3];
+                    allUserList.get(account).setNickName(nickName);
+                    allUserList.get(account).setSignature(signature);
+                    allUserList.get(account).setImg_url(image);
                 }
             }
         });
@@ -127,7 +123,9 @@ public class UserStatus {
     }
 
     public static void onLogout(String account){
-        allUserList.get(account).setOnLine(false);
+        if(allUserList.containsKey(account)){
+            allUserList.get(account).setOnLine(false);
+        }
         if(onLineUserList.containsKey(account)){
             onLineUserList.remove(account);
         }

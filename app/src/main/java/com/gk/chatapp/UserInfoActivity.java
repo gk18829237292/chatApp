@@ -190,7 +190,6 @@ public class UserInfoActivity extends ActionBarActivity {
         });
         bt1.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                showDialog();
                 Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 filePath = Environment.getExternalStorageDirectory() +"/" + System.currentTimeMillis() + ".jpg";
                 camera.putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(new File(filePath)));
@@ -233,6 +232,7 @@ public class UserInfoActivity extends ActionBarActivity {
         if(resultCode == Activity.RESULT_CANCELED){
             return;
         }
+        Log.d(TAG,"resultCode is " + resultCode);
         if(requestCode == Constant.PICTURE_INT){
             Uri uri = data.getData();
             Cursor cursor = getContentResolver().query(uri, null, null, null,null);

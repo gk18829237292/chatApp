@@ -3,8 +3,12 @@ package com.gk.chatapp;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -15,9 +19,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -37,6 +46,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +71,7 @@ public class MainActivity extends ActionBarActivity {
     private ImageView iv_image;
 
     public UserListFragment fragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,6 +252,5 @@ public class MainActivity extends ActionBarActivity {
             updateHeadView();
         }
     }
-
 
 }
