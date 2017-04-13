@@ -4,6 +4,7 @@ import android.graphics.Bitmap.Config;
 import android.widget.ImageView;
 
 import com.gk.chatapp.R;
+import com.gk.chatapp.constant.Constant;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
@@ -32,7 +33,11 @@ public class ImageUtil {
 			loader.clearMemoryCache();
 		}
 	}
-	
+
+	public static void displayRoundImageWithBaseUrl(ImageView view,String fileName,ImageLoadingListener listener){
+		displayRoundImage(view, Constant.IMG_BASEURL_STR + fileName,listener);
+	}
+
 	public static void loadImage(String path, ImageLoadingListener listener) {
 		ImageLoader loader = ImageLoader.getInstance();
 		try {

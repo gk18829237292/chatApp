@@ -4,15 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -33,21 +30,12 @@ import com.gk.chatapp.utils.ProgressDialogFactory;
 import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.ToastUtils;
 import com.gk.chatapp.utils.UploadUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.qiniu.android.http.ResponseInfo;
 import com.qiniu.android.storage.UpCompletionHandler;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.lang.annotation.Target;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 import io.socket.emitter.Emitter;
 
@@ -69,6 +57,8 @@ public class UserInfoActivity extends ActionBarActivity {
     LinearLayout ll_popup;
 
     private ProgressDialog mPdialog;
+    private String account,nickname,signature;
+    private String img_url = Constant.DEF_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,18 +86,16 @@ public class UserInfoActivity extends ActionBarActivity {
         et_nickname.setText(intent.getStringExtra(Constant.NICKNAME));
         et_signature.setText(intent.getStringExtra(Constant.SIGNATURE));
 
-        String url = intent.getStringExtra(Constant.URL_STRING);
-        if(url == null){
-            url = Constant.DEF_URL;
+        img_url = intent.getStringExtra(Constant.URL_STR);
+        if(img_url == null){
+            img_url = Constant.DEF_URL;
         }
-        ImageUtil.displayRoundImage(iv_image,url,null);
-
+        ImageUtil.displayRoundImage(iv_image,Constant.IMG_BASEURL_STR+img_url,null);
         boolean flag = intent.getBooleanExtra(Constant.CAN_EDIT,false);
-        if(!flag){
-            changeEnable(true);
+        changeEnable(false);
+        if(flag){
             btn_change.setVisibility(View.VISIBLE);
         }else {
-            changeEnable(false);
             btn_change.setVisibility(View.GONE);
         }
 
@@ -116,11 +104,12 @@ public class UserInfoActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 if(btn_change.getText() == "编辑"){
-                    btn_change.setText("保存");
                     changeEnable(true);
-                }else{
-                    btn_change.setText("编辑");
-
+                }else if(checkNickname() && checkSignature()){
+                    changeEnable(false);
+                    //更新User
+                    account = tv_account.getText().toString();
+                    SocketIoUtils.sendMessage("updateUser",account,nickname,signature,img_url);
                 }
             }
         });
@@ -151,6 +140,7 @@ public class UserInfoActivity extends ActionBarActivity {
                         Log.d(TAG,"key is : " + key);
                         if(info.isOK()){
                             Log.d(TAG,"success");
+                            img_url = key;
                             uploadSuccess(key);
                         }else if(info.needRetry()){
                             Log.d(TAG,"failed  needRetry " + info.toString());
@@ -160,6 +150,18 @@ public class UserInfoActivity extends ActionBarActivity {
                         }
                     }
                 },null);
+            }
+        });
+
+        SocketIoUtils.registerListener("update_result", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                boolean result = (boolean) args[0];
+                if(result){
+                    updateSuccess();
+                }else{
+                    updateFiled();
+                }
             }
         });
     }
@@ -215,10 +217,13 @@ public class UserInfoActivity extends ActionBarActivity {
 
     private void changeEnable(boolean flag){
         iv_image.setEnabled(flag);
-//        tv_account.setEnabled(flag);
         et_nickname.setEnabled(flag);
         et_signature.setEnabled(flag);
-
+        if(flag){
+            btn_change.setText("保存");
+        }else{
+            btn_change.setText("编辑");
+        }
     }
 
     @Override
@@ -285,4 +290,42 @@ public class UserInfoActivity extends ActionBarActivity {
         }
     }
 
+    private void updateSuccess(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToastUtils.showShortToast(getApplicationContext(),"更新成功");
+            }
+        });
+    }
+
+    private void updateFiled(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ToastUtils.showShortToast(getApplicationContext(),"更新失败，请重试");
+                changeEnable(true);
+            }
+        });
+    }
+
+    private boolean checkNickname(){
+        nickname = et_nickname.getText().toString();
+        et_nickname.setError(null);
+        if(nickname.length() == 0 ){
+            et_nickname.setError("请输入用户昵称");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkSignature(){
+        signature = et_signature.getText().toString();
+        et_signature.setError(null);
+        if(signature.length() == 0){
+            et_signature.setError("请输入个性签名");
+            return false;
+        }
+        return true;
+    }
 }

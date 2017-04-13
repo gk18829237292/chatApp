@@ -1,5 +1,6 @@
 package com.gk.chatapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,8 +24,10 @@ import android.widget.TextView;
 import com.gk.chatapp.adapter.DrawAdapter;
 import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
+import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
+import com.gk.chatapp.utils.ImageUtil;
 import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.UserStatus;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -48,6 +52,7 @@ public class MainActivity extends ActionBarActivity {
     private Handler mHandler;
 
     private TextView tv_nickName, tv_signature;
+    private ImageView iv_image;
 
     public UserListFragment fragment;
 
@@ -100,6 +105,12 @@ public class MainActivity extends ActionBarActivity {
                     selectItem(i,mDrawerItems.get(i-1).getTag());
                 }else{
                     Intent intent = new Intent(MainActivity.this,UserInfoActivity.class);
+                    intent.putExtra(Constant.CAN_EDIT,true);
+                    UserEntry entry = App.getInstance().getMyEntry();
+                    intent.putExtra(Constant.ACCOUNT,entry.getAccount());
+                    intent.putExtra(Constant.NICKNAME,entry.getNickName());
+                    intent.putExtra(Constant.SIGNATURE,entry.getSignature());
+                    intent.putExtra(Constant.URL_STR,entry.getImg_url());
                     startActivityForResult(intent,1);
                 }
             }
@@ -109,7 +120,7 @@ public class MainActivity extends ActionBarActivity {
 
         tv_nickName= (TextView) headerView.findViewById(R.id.tv_nickName);
         tv_signature= (TextView) headerView.findViewById(R.id.tv_signature);
-
+        iv_image = (ImageView) headerView.findViewById(R.id.iv_image);
 
         mDrawerList.addHeaderView(headerView);
 
@@ -117,11 +128,17 @@ public class MainActivity extends ActionBarActivity {
         commitFragment(fragment);
 
         //侧边栏部分
+        updateHeadView();
+    }
+
+    private void updateHeadView(){
         if(App.getInstance().getMyEntry() != null){
+            ImageUtil.displayRoundImageWithBaseUrl(iv_image,App.getInstance().getMyEntry().getImg_url(),null);
             tv_nickName.setText(App.getInstance().getMyEntry().getNickName());
             tv_signature.setText(App.getInstance().getMyEntry().getSignature());
         }
     }
+
 
     private void initData(){
         mSpref = new SprefUtils(this);
@@ -207,4 +224,11 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            updateHeadView();
+        }
+    }
 }

@@ -17,11 +17,12 @@ public class Constant {
     public static final String PASSWORD="password";
     public static final String NICKNAME="nickname";
     public static final String SIGNATURE="signature";
+    public static final String IMAGE="image";
 
     public static final String RECENTUSER="recentUser";
 
-    public static final String URL_STRING="URL";
-    public static final String DEF_URL ="http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg";
+    public static final String URL_STR ="URL";
+    public static final String DEF_URL ="1492005148379.jpg";
     public static final String IMG_BASEURL_STR="http://ooaptg3q1.bkt.clouddn.com/";
 
     public static final String CAN_EDIT="editFlag";

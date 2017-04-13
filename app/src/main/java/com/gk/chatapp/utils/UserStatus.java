@@ -58,7 +58,7 @@ public class UserStatus {
         SocketIoUtils.registerListener("newUser", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                UserEntry entry = new UserEntry((String)args[0],(String)args[1],(String)args[2],false);
+                UserEntry entry = new UserEntry((String)args[0],(String)args[1],(String)args[2],(String)args[3],false);
                 onNewUser(entry);
             }
         });
@@ -88,7 +88,7 @@ public class UserStatus {
                     JSONArray jsonArray = new JSONArray(args[0].toString());
                     for(int i =0;i<jsonArray.length();i++){
                         JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),false);
+                        UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),jsonObject.getString(Constant.IMAGE),false);
                         allUserList.put(entry.getAccount(),entry);
                     }
                     SocketIoUtils.sendMessage("getAllUserOnline","");

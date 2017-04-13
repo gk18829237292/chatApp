@@ -77,8 +77,8 @@ public class LoginActivity extends Activity {
             public void call(Object... args) {
                 boolean result = (boolean) args[0];
                 if(result){
-                    //登录成功，返回 账户名，昵称，签名，（照片再说）
-                    UserEntry user = new UserEntry((String) args[1],(String)args[2],(String)args[3],true);
+                    //登录成功，返回 账户名，昵称，签名，照片 2017年4月13日09:39:03 照片
+                    UserEntry user = new UserEntry((String) args[1],(String)args[2],(String)args[3],(String)args[4],true);
                     App.getInstance().setMyEntry(user);
                     Log.d(TAG,App.getInstance().getMyEntry().toString());
                     loginSuccess();
