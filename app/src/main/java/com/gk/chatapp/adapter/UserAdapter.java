@@ -58,8 +58,8 @@ public class UserAdapter extends BaseAdapter{
         }else {
             holder = (ViewHolder) convertView.getTag();
         }
-        ImageUtil.displayRoundImage(holder.image,"http://pengaja.com/uiapptemplate/newphotos/listviews/draganddrop/travel/0.jpg",null);
         UserEntry entry = mUserEntries.get(position);
+        ImageUtil.displayRoundImageWithBaseUrl(holder.image,entry.getImg_url(),null);
         holder.name.setText(entry.getNickName());
         holder.signature.setText(entry.getSignature());
         if(entry.isOnLine()){

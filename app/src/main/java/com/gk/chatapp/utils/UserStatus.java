@@ -85,13 +85,7 @@ public class UserStatus {
             @Override
             public void call(Object... args) {
                 try {
-                    JSONArray jsonArray = new JSONArray(args[0].toString());
-                    for(int i =0;i<jsonArray.length();i++){
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),jsonObject.getString(Constant.IMAGE),false);
-                        allUserList.put(entry.getAccount(),entry);
-                    }
-                    SocketIoUtils.sendMessage("getAllUserOnline","");
+                    updateInfo(new JSONArray(args[0].toString()),new JSONArray(args[1].toString()));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -156,6 +150,27 @@ public class UserStatus {
             if(onLineUserList.containsKey(account)) onLineUserList.remove(account);
             if(recentUserList.containsKey(account)) recentUserList.remove(account);
         }
+    }
+
+    public static void updateInfo(JSONArray userList,JSONArray userListOnline) throws JSONException {
+        allUserList.clear();
+        for(int i =0;i<userList.length();i++){
+            JSONObject jsonObject = userList.getJSONObject(i);
+            UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),jsonObject.getString(Constant.IMAGE),false);
+            allUserList.put(entry.getAccount(),entry);
+        }
+
+        onLineUserList.clear();
+        for(int i = 0; i< userListOnline.length();i++){
+            String account = userListOnline.getString(i);
+            if(!allUserList.containsKey(account)) {
+                continue;
+            }
+            allUserList.get(account).setOnLine(true);
+            onLineUserList.put(account,allUserList.get(account));
+        }
+
+        removeMySelf();
     }
 
 }

@@ -24,6 +24,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.utils.ImageUtil;
 import com.gk.chatapp.utils.ProgressDialogFactory;
@@ -153,7 +154,7 @@ public class UserInfoActivity extends ActionBarActivity {
             }
         });
 
-        SocketIoUtils.registerListener("update_result", new Emitter.Listener() {
+        SocketIoUtils.registerListener("updateUser_result", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 boolean result = (boolean) args[0];
@@ -262,7 +263,7 @@ public class UserInfoActivity extends ActionBarActivity {
             public void run() {
                 hideDialog();
                 ToastUtils.showShortToast(getApplicationContext(),"上传成功");
-                ImageUtil.displayRoundImage(iv_image,Constant.IMG_BASEURL_STR+fileName,null);
+                ImageUtil.displayRoundImageWithBaseUrl(iv_image,fileName,null);
             }
         });
     }
@@ -295,6 +296,10 @@ public class UserInfoActivity extends ActionBarActivity {
             @Override
             public void run() {
                 ToastUtils.showShortToast(getApplicationContext(),"更新成功");
+                Log.d(TAG,img_url);
+                App.getInstance().getMyEntry().setImg_url(img_url);
+                App.getInstance().getMyEntry().setNickName(nickname);
+                App.getInstance().getMyEntry().setSignature(signature);
             }
         });
     }

@@ -28,14 +28,20 @@ import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.fragment.UserListFragment;
 import com.gk.chatapp.model.DrawerItem;
 import com.gk.chatapp.utils.ImageUtil;
+import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.UserStatus;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import io.socket.emitter.Emitter;
 
 import static com.gk.chatapp.model.DrawerItem.DRAWER_ITEM_TAG_LOGOUT;
 
@@ -63,7 +69,7 @@ public class MainActivity extends ActionBarActivity {
 
         prepareNaigationDrawerItems();
         initView();
-
+        initData();
         //TODO 看代码 看看作用
         if(savedInstanceState == null){
             int position = 0;
@@ -141,9 +147,12 @@ public class MainActivity extends ActionBarActivity {
 
 
     private void initData(){
-        mSpref = new SprefUtils(this);
-        Set<String> users = mSpref.getStringSet(Constant.RECENTUSER,null);
-        UserStatus.addRecentUser(users);
+        UserStatus.removeMySelf();
+//        mSpref = new SprefUtils(this);
+//        Set<String> users = mSpref.getStringSet(Constant.RECENTUSER,null);
+//        UserStatus.addRecentUser(users);
+
+
     }
 
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
@@ -218,6 +227,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void logout(){
+        SocketIoUtils.sendMessage("logout",App.getInstance().getMyEntry().getAccount());
         Intent intent= new Intent(MainActivity.this,LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intent.putExtra("flag",true);
@@ -231,4 +241,6 @@ public class MainActivity extends ActionBarActivity {
             updateHeadView();
         }
     }
+
+
 }
