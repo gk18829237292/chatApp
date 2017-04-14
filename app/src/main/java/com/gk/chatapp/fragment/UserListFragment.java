@@ -155,6 +155,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), VideoCallActivity.class);
+                intent.putExtra(Constant.PARAM_IS_CALLER,Constant.IS_CALLER_YES);
                 startActivity(intent);
             }
         });

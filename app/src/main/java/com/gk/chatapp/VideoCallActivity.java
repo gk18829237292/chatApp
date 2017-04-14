@@ -15,11 +15,13 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.p2p.PeerConnectionClient;
 import com.gk.chatapp.p2p.PercentFrameLayout;
 import com.gk.chatapp.p2p.SnapshotVideoRenderer;
 import com.gk.chatapp.p2p.audiomanager.AppRTCAudioManager;
+import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.StringUtils;
 
@@ -42,6 +44,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import io.socket.emitter.Emitter;
 
 /**
  * 视频通话页面
@@ -81,21 +85,22 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     private ScalingType scalingType;
     private EglBase rootEglBase;
     private int mIsCaller = Constant.IS_CALLER_YES;
-    private String mSdpStr;
+//    private String mSdpStr;
     private boolean mMicEnabled = true;
     private boolean mIsIceConnected;
     private SnapshotVideoRenderer mSnapshotRenderer;
     private boolean mCallControlFragmentVisible = true;
     private boolean mIsMirror = true;
     private View mViewCall, mViewPrevAnswer, mViewOperation;
-    // 确保对方EventBus注册之后，再发ICE信息，防止对方无法处理
+
     private boolean mCanSendIce = false;
-    private LinkedList<IceCandidate> mQueuedLocalCandidates = new LinkedList<>();
     private AppRTCAudioManager audioManager = null;
     private MediaPlayer mMediaPlayer;
     private Vibrator mVibrator;
 
     private TextView mTvCallName,mTvPeerName;
+
+    private String mPeerAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -230,16 +235,18 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         mBtnSnap.setOnClickListener(this);
         mBtnChangeCamera.setOnClickListener(this);
 
-        // Show/hide call control fragment on view click.
-        View.OnClickListener listener = new View.OnClickListener() {
+        localRender.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 toggleCallControlFragmentVisibility();
             }
-        };
-
-        localRender.setOnClickListener(listener);
-        remoteRenderScreen.setOnClickListener(listener);
+        });
+        remoteRenderScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleCallControlFragmentVisibility();
+            }
+        });
         remoteRenderers.add(remoteRenderScreen);
 
         // Create video renderers.
@@ -303,32 +310,28 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
             //TODO 设置名称 mTvCallName.setText(mPeerName + " 拨通中...");
             // Create offer. Offer SDP will be sent to answering client in
             // PeerConnectionEvents.onLocalDescription event.
-            peerConnectionClient.createOffer();
+//            peerConnectionClient.createOffer();
+            //发送init 消息
+            SocketIoUtils.sendMessage("init",mPeerAccount, App.getInstance().getMyEntry().getAccount());
         } else {
             mViewCall.setVisibility(View.GONE);
             mViewOperation.setVisibility(View.VISIBLE);
             mViewPrevAnswer.setVisibility(View.VISIBLE);
             //TODO 显示名称mTvPeerName.setText(mPeerName + " 邀请你视频聊天");
             startRing();
-            if (!StringUtils.isSpace(mSdpStr)) {
-                mCanSendIce = true;
-                SessionDescription sdp = new SessionDescription(SessionDescription.Type.OFFER, mSdpStr);
-                peerConnectionClient.setRemoteDescription(sdp);
-                // Create answer. Answer SDP will be sent to offering client in
-                // PeerConnectionEvents.onLocalDescription event.
-//                peerConnectionClient.createPrAnswer();
-            }
+//            if (!StringUtils.isSpace(mSdpStr)) {
+//                mCanSendIce = true;
+//                SessionDescription sdp = new SessionDescription(SessionDescription.Type.OFFER, mSdpStr);
+//                peerConnectionClient.setRemoteDescription(sdp);
+//                // Create answer. Answer SDP will be sent to offering client in
+//                // PeerConnectionEvents.onLocalDescription event.
+////                peerConnectionClient.createPrAnswer();
+//            }
         }
 
         // Create and audio manager that will take care of audio routing,
         // audio modes, audio device enumeration etc.
-        audioManager = AppRTCAudioManager.create(this, new Runnable() {
-            // This method will be called each time the audio state (number and
-            // type of devices) has been changed.
-            @Override
-            public void run() {
-            }
-        });
+        audioManager = AppRTCAudioManager.create(this, null);
         // Store existing audio settings and change audio mode to
         // MODE_IN_COMMUNICATION for best possible VoIP performance.
         Log.d(TAG, "Initializing the audio manager...");
@@ -347,6 +350,18 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
 //        if (mIsCaller != Constant.IS_CALLER_YES) {
 //            mSdpStr = getIntent().getExtras().get(Constant.PARAM_SDP).toString();
 //        }
+
+        SocketIoUtils.registerListener("init_result", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                boolean result = (boolean) args[0];
+                if(result){
+                    //对方同意
+                }else{
+                    //对方拒绝
+                }
+            }
+        });
     }
 
     @Override
@@ -389,7 +404,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
                 if (mCanSendIce) {
                     //TODO 发送ICE MessageUtil.sendICECandidate(candidate, mGroupID, mPeerID);
                 } else {
-                    mQueuedLocalCandidates.add(candidate);
                 }
             }
         });
