@@ -1,11 +1,7 @@
 package com.gk.chatapp;
 
 import android.app.Activity;
-import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -19,19 +15,19 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
+import com.gk.chatapp.p2p.PeerConnectionClient;
+import com.gk.chatapp.p2p.PercentFrameLayout;
+import com.gk.chatapp.p2p.SnapshotVideoRenderer;
+import com.gk.chatapp.p2p.audiomanager.AppRTCAudioManager;
 import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.StringUtils;
-import com.gk.chatapp.utils.ToastUtils;
-import com.hobot.p2p.HrP2PEngine;
-import com.hobot.p2p.signal.JsonSignalChannel;
-import com.hobot.p2p.webtrc.PeerConnectionClient.PeerConnectionParameters;
-import com.hobot.p2p.webtrc.PercentFrameLayout;
-import com.hobot.p2p.webtrc.SnapshotVideoRenderer;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.webrtc.Camera1Enumerator;
+import org.webrtc.CameraEnumerator;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
@@ -39,20 +35,23 @@ import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoCapturer;
 import org.webrtc.VideoRenderer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-
 
 /**
  * 视频通话页面
  */
-public class VideoCallActivity extends Activity implements View.OnClickListener {
+public class VideoCallActivity extends Activity implements View.OnClickListener,PeerConnectionClient.PeerConnectionEvents {
 
-    private static final String TAG = VideoCallActivity.class.getSimpleName();
+    private static final String TAG = "VideoCallActivity";
 
+    private static final String VIDEO_CODEC = "H264";
+    private static final String AUDIO_CODEC = "opus";
     // Peer connection statistics callback period in ms.
     private static final int STAT_CALLBACK_PERIOD = 1000;
     // Local preview screen position before call is connected.
@@ -71,190 +70,32 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
     private static final int REMOTE_WIDTH = 100;
     private static final int REMOTE_HEIGHT = 100;
 
-    private static final String ACTION_PHONE_STATE = "android.intent.action.PHONE_STATE";
-    private static final String ACTION_NEW_OUTGOING_CALL = "android.intent.action.NEW_OUTGOING_CALL";
-
     private final List<VideoRenderer.Callbacks> remoteRenderers = new ArrayList<>();
     private SurfaceViewRenderer localRender;
     private SurfaceViewRenderer remoteRenderScreen;
     private PercentFrameLayout localRenderLayout;
     private PercentFrameLayout remoteRenderLayout;
-    private TextView mTvCallName, mTvPeerName;
-    private Button mBtnMute, mBtnHung, mBtnSnap, mBtnChangeCamera, mBtnShowLog, mBtnClose, mBtnAccept, mBtnHandsFree;
-    private String mGroupID, mPeerID, mPeerName;
-    private PeerConnectionParameters peerConnectionParameters;
+    private Button mBtnMute, mBtnHung, mBtnSnap, mBtnChangeCamera, mBtnClose, mBtnAccept, mBtnHandsFree;
+    private PeerConnectionClient peerConnectionClient = null;
+    private PeerConnectionClient.PeerConnectionParameters peerConnectionParameters;
     private ScalingType scalingType;
     private EglBase rootEglBase;
     private int mIsCaller = Constant.IS_CALLER_YES;
     private String mSdpStr;
+    private boolean mMicEnabled = true;
     private boolean mIsIceConnected;
     private SnapshotVideoRenderer mSnapshotRenderer;
     private boolean mCallControlFragmentVisible = true;
-    private SprefUtils mPrefs;
-    private View mViewCall, mViewPrevAnswer, mViewLogInfo, mViewOperation;
-    // log信息
-    private boolean mLogInfoShow = false;
-    private boolean mIsShowDebug = false;
-    private TextView mTvGroupPeers, mTvConnInfo, mTvIceInfo;
-    private ListView mLvInfo, mLvReceiveInfo;
-    private String mConnectionInfo = "";
-    private String mIceInfo = "";
-    private List<String> mSendLogInfo = new ArrayList<>();
-    private List<String> mReceiveLogInfo = new ArrayList<>();
-    private ArrayAdapter<String> mAdapterSend;
-    private ArrayAdapter<String> mAdapterReceive;
+    private boolean mIsMirror = true;
+    private View mViewCall, mViewPrevAnswer, mViewOperation;
+    // 确保对方EventBus注册之后，再发ICE信息，防止对方无法处理
+    private boolean mCanSendIce = false;
+    private LinkedList<IceCandidate> mQueuedLocalCandidates = new LinkedList<>();
+    private AppRTCAudioManager audioManager = null;
     private MediaPlayer mMediaPlayer;
     private Vibrator mVibrator;
 
-
-    private BroadcastReceiver mHangUpReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // 关机、有电话的情况下，要挂断视频通话
-            if (intent != null && (Intent.ACTION_SHUTDOWN.equals(intent.getAction())
-                    || ACTION_PHONE_STATE.equals(intent.getAction())
-                    || ACTION_NEW_OUTGOING_CALL.equals(intent.getAction()))) {
-                Log.d(TAG, intent.getAction());
-                finish();
-            }
-        }
-    };
-
-    private HrP2PEngine.HRP2PListener hrp2PListener = new HrP2PEngine.HRP2PListener() {
-        @Override
-        public void onSingalMessageReceived(String s) {
-            try {
-                final JSONObject json = new JSONObject(s);
-                String operationStr = json.getString(JsonSignalChannel.Field.type.name());
-                JsonSignalChannel.operations operation = JsonSignalChannel.operations.valueOf(operationStr);
-                switch (operation) {
-                    case group_peers: // 房间信息变化，就会同步各个终端 ，加入，离开，连接断开
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    mTvGroupPeers.setText(json.getJSONArray(JsonSignalChannel.Field.peers.name()).toString());
-                                } catch (JSONException e) {
-                                    Log.e(TAG, "JSON parse failed:" + e);
-                                }
-                            }
-                        });
-                        break;
-                    case connect_err:
-                        String message = json.getString(JsonSignalChannel.Field.message.name());
-                        ToastUtils.showShortToast(getApplicationContext(), message);
-                        Log.d(TAG, "finish in connect_err");
-                        finish();
-                        break;
-                    case app_leaving:
-                        // 收到App_leaving 结束
-                        Log.d(TAG, "finish in app_leaving");
-                        finish();
-                        break;
-                    case close_stream:
-                        Log.d(TAG, "finish in close_stream");
-                        finish();
-                    default:
-                        break;
-                }
-            } catch (JSONException e) {
-                Log.e(TAG, "JSON parse failed:" + e);
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "Not supported signal type:" + e);
-            }
-        }
-
-        @Override
-        public void onOfferReceived(OfferInfo offerInfo) {
-
-        }
-
-        @Override
-        public void onOfferReInvite(OfferInfo offerInfo) {
-        }
-
-        @Override
-        public void onTimerCountDown() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ToastUtils.showShortToast(getApplicationContext(), "无响应");
-                    Log.d(TAG, "finish in CountDownTimer");
-                    finish();
-                }
-            });
-        }
-
-        @Override
-        public void onTimerTick(long l) {
-
-        }
-
-        @Override
-        public void onConnected() {
-            mIsIceConnected = true;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mViewCall.setVisibility(View.GONE);
-                    mViewOperation.setVisibility(View.VISIBLE);
-                    callConnected();
-                }
-            });
-        }
-
-        @Override
-        public void onDisconnected() {
-            mIsIceConnected = false;
-//            App.getInstance().getHrP2PEngine().enableStatsEvents(false, STAT_CALLBACK_PERIOD);
-        }
-
-        @Override
-        public void onIceCandidate(final IceCandidate candidate) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mSendLogInfo.add(1, StringUtils.changeToString(candidate.sdp));
-                    mAdapterSend.notifyDataSetChanged();
-                }
-            });
-        }
-
-        @Override
-        public void onPeerConnectionStatsReady(final StatsReport[] statsReports) {
-
-        }
-
-        @Override
-        public void onPeerConnectionStatueChange(final PeerConnection.SignalingState newState) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!StringUtils.isSpace(mConnectionInfo)) {
-                        mConnectionInfo += " => ";
-                    }
-                    mConnectionInfo += newState.toString();
-                    mTvConnInfo.setText("state: " + mConnectionInfo);
-                    Log.d(TAG, "state: " + mConnectionInfo);
-                }
-            });
-        }
-
-        @Override
-        public void onIceStatueChange(final PeerConnection.IceConnectionState iceConnectionState) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!StringUtils.isSpace(mIceInfo)) {
-                        mIceInfo += " => ";
-                    }
-                    mIceInfo += iceConnectionState.toString();
-                    mTvIceInfo.setText("ICE state: " + mIceInfo);
-                    Log.d(TAG, "ICE state: " + mIceInfo);
-                }
-            });
-        }
-    };
+    private TextView mTvCallName,mTvPeerName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,33 +109,33 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
                 | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         setContentView(R.layout.activity_video_call);
 
-        getIntentData();
-        initView();
+        mIsIceConnected = false;
+        scalingType = ScalingType.SCALE_ASPECT_BALANCED;
         initData();
-
+        initView();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         // Video is not paused for screencapture. See onPause.
-        App.getInstance().getHrP2PEngine().startVideoSource();
+        if (peerConnectionClient != null) {
+            peerConnectionClient.startVideoSource();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        App.getInstance().getHrP2PEngine().stopVideoSource();
+        // Don't stop the video when using screencapture to allow user to show other apps to the remote end.
+//        if (peerConnectionClient != null) {
+//            peerConnectionClient.stopVideoSource();
+//        }
     }
 
     @Override
     protected void onDestroy() {
-        if (mHangUpReceiver != null) {
-            unregisterReceiver(mHangUpReceiver);
-        }
-
         stopRing();
-        App.getInstance().getHrP2PEngine().removeListener(hrp2PListener);
         disconnect();
         rootEglBase.release();
         super.onDestroy();
@@ -305,43 +146,50 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_accept:
                 stopRing();
-                //这里汇报 准备连接事件
-                Countly.sharedInstance().recordEvent(Constant.COUNTLY_CONNECTING_ANSWER);
-                App.getInstance().getHrP2PEngine().accept();
+                if (peerConnectionClient != null) {
+                    peerConnectionClient.createAnswer();
+                }
                 mViewPrevAnswer.setVisibility(View.GONE);
                 break;
             case R.id.btn_refuse:
             case R.id.btn_close:
-                App.getInstance().getHrP2PEngine().hangup();
-                Log.d(TAG, "finish in btn_close");
+                //TODO close完善
+//                MessageUtil.sendCloseStream(mGroupID, mPeerID);
                 finish();
                 break;
             case R.id.btn_changeCamera:
                 //切换本地摄像头
-                App.getInstance().getHrP2PEngine().switchLocalCamera();
+                if (peerConnectionClient != null) {
+                    mIsMirror = !mIsMirror;
+                    localRender.setMirror(mIsMirror);
+                    peerConnectionClient.switchCamera();
+                }
                 break;
             case R.id.btn_mute:
                 //静音（使对方听不到声音）
-                boolean mute = App.getInstance().getHrP2PEngine().mute();
-                if (mute) {
-                    mBtnMute.setText("静音 关");
-                } else {
-                    mBtnMute.setText("静音 开");
+                if (peerConnectionClient != null) {
+                    mMicEnabled = !mMicEnabled;
+                    peerConnectionClient.setAudioEnabled(mMicEnabled);
+                    if (mMicEnabled) {
+                        mBtnMute.setText("静音 关");
+                    } else {
+                        mBtnMute.setText("静音 开");
+                    }
                 }
                 break;
             case R.id.btn_hands_free:
                 // 免提 SPEAKER_PHONE, WIRED_HEADSET, EARPIECE
-                boolean handsFree = App.getInstance().getHrP2PEngine().handsFree();
-                if (handsFree) {
+                if (audioManager.getSelectedAudioDevice().equals(AppRTCAudioManager.AudioDevice.EARPIECE)) {
+                    audioManager.setAudioDevice(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE);
                     mBtnHandsFree.setText("免提 开");
-                } else {
+                } else if (audioManager.getSelectedAudioDevice().equals(AppRTCAudioManager.AudioDevice.SPEAKER_PHONE)) {
+                    audioManager.setAudioDevice(AppRTCAudioManager.AudioDevice.EARPIECE);
                     mBtnHandsFree.setText("免提 关");
                 }
                 break;
             case R.id.btn_hung:
                 // 挂断，不离开房间
-                App.getInstance().getHrP2PEngine().hangup();
-                Log.d(TAG, "finish in btn_hung");
+//TODO                MessageUtil.sendCloseStream(mGroupID, mPeerID);
                 finish();
                 break;
             case R.id.btn_snap:
@@ -349,42 +197,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
                     mSnapshotRenderer.takeSnapshot();
                 }
                 break;
-            case R.id.btn_showLog:
-                mLogInfoShow = !mLogInfoShow;
-                if (mLogInfoShow) {
-                    mBtnShowLog.setText("隐藏Log");
-                    mViewLogInfo.setVisibility(View.VISIBLE);
-                } else {
-                    mBtnShowLog.setText("显示Log");
-                    mViewLogInfo.setVisibility(View.INVISIBLE);
-                }
-                break;
-            case R.id.btn_debug:
-                mIsShowDebug = !mIsShowDebug;
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                if (mIsShowDebug) {
-                    ft.hide(hudFragment);
-                } else {
-                    ft.show(hudFragment);
-                }
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                ft.commit();
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * 接受传过来的参数
-     */
-    private void getIntentData() {
-        mIsCaller = getIntent().getExtras().getInt(Constant.PARAM_IS_CALLER, Constant.IS_CALLER_YES);
-        mGroupID = getIntent().getExtras().get(Constant.PARAM_GROUP_ID).toString();
-        mPeerID = getIntent().getExtras().get(Constant.PARAM_PEER_ID).toString();
-        mPeerName = getIntent().getExtras().get(Constant.PARAM_PEER_NAME).toString();
-        if (mIsCaller != Constant.IS_CALLER_YES) {
-            mSdpStr = getIntent().getExtras().get(Constant.PARAM_SDP).toString();
         }
     }
 
@@ -392,7 +204,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
      * 初始化控件
      */
     private void initView() {
-        mPrefs = new SprefUtils(this);
         localRender = (SurfaceViewRenderer) findViewById(R.id.local_video_view);
         remoteRenderScreen = (SurfaceViewRenderer) findViewById(R.id.remote_video_view);
         localRenderLayout = (PercentFrameLayout) findViewById(R.id.local_video_layout);
@@ -402,18 +213,11 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         mBtnClose = (Button) findViewById(R.id.btn_close);
         mBtnAccept = (Button) findViewById(R.id.btn_accept);
         mBtnChangeCamera = (Button) findViewById(R.id.btn_changeCamera);
-        mBtnShowLog = (Button) findViewById(R.id.btn_showLog);
-        mLvInfo = (ListView) findViewById(R.id.lv_logInfo);
-        mLvReceiveInfo = (ListView) findViewById(R.id.lv_logReceiveInfo);
         mBtnMute = (Button) findViewById(R.id.btn_mute);
         mBtnHung = (Button) findViewById(R.id.btn_hung);
         mBtnSnap = (Button) findViewById(R.id.btn_snap);
-        mTvGroupPeers = (TextView) findViewById(R.id.tv_group_peers);
-        mTvConnInfo = (TextView) findViewById(R.id.tv_connInfo);
-        mTvIceInfo = (TextView) findViewById(R.id.tv_iceInfo);
         mViewCall = findViewById(R.id.rl_call);
         mViewPrevAnswer = findViewById(R.id.rl_prev_answer);
-        mViewLogInfo = findViewById(R.id.ll_log);
         mViewOperation = findViewById(R.id.ll_operation);
         mBtnHandsFree = (Button) findViewById(R.id.btn_hands_free);
 
@@ -425,25 +229,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         mBtnHung.setOnClickListener(this);
         mBtnSnap.setOnClickListener(this);
         mBtnChangeCamera.setOnClickListener(this);
-        mBtnShowLog.setOnClickListener(this);
-        findViewById(R.id.btn_debug).setOnClickListener(this);
-
-        IntentFilter hangUpFilter = new IntentFilter();
-        hangUpFilter.addAction(Intent.ACTION_SHUTDOWN);
-        hangUpFilter.addAction(ACTION_PHONE_STATE);
-        hangUpFilter.addAction(ACTION_NEW_OUTGOING_CALL);
-        registerReceiver(mHangUpReceiver, hangUpFilter);
-
-        if (mLogInfoShow) {
-            mBtnShowLog.setText("隐藏Log");
-            mViewLogInfo.setVisibility(View.VISIBLE);
-        } else {
-            mBtnShowLog.setText("显示Log");
-            mViewLogInfo.setVisibility(View.INVISIBLE);
-        }
-
-        mIsIceConnected = false;
-        scalingType = ScalingType.SCALE_ASPECT_BALANCED;
 
         // Show/hide call control fragment on view click.
         View.OnClickListener listener = new View.OnClickListener() {
@@ -456,15 +241,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         localRender.setOnClickListener(listener);
         remoteRenderScreen.setOnClickListener(listener);
         remoteRenderers.add(remoteRenderScreen);
-        mLvInfo.setOnItemClickListener(null);
-        mSendLogInfo.add("send Ice:");
-        mAdapterSend = new ArrayAdapter<String>(this, R.layout.list_item_debug_info, mSendLogInfo);
-        mReceiveLogInfo.add("reveive Ice:");
-        mAdapterReceive = new ArrayAdapter<String>(this, R.layout.list_item_debug_info, mReceiveLogInfo);
-        mLvInfo.setAdapter(mAdapterSend);
-        mLvReceiveInfo.setAdapter(mAdapterReceive);
-        mLvInfo.setDivider(null);
-        mLvReceiveInfo.setDivider(null);
 
         // Create video renderers.
         rootEglBase = EglBase.create();
@@ -479,58 +255,98 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         updateVideoView();
 
         /**
-         PeerConnectionParameters(boolean videoCallEnabled, int videoWidth, int videoHeight, int videoFps, int videoMaxBitrate, String videoCodec,
+         *  PeerConnectionParameters(boolean videoCallEnabled, boolean loopback, boolean tracing,
+         int videoWidth, int videoHeight, int videoFps, int videoMaxBitrate, String videoCoadaddec,
          boolean videoCodecHwAcceleration, int audioStartBitrate, String audioCodec,
-         boolean aecDump, boolean useOpenSLES, boolean disableBuiltInAEC, boolean disableBuiltInNS, boolean enableLevelControl)
+         boolean noAudioProcessing, boolean aecDump, boolean useOpenSLES, boolean disableBuiltInAEC,
+         boolean disableBuiltInAGC, boolean disableBuiltInNS, boolean enableLevelControl) {
          */
-        boolean videoCallEnabled = mPrefs.getBoolean(Constant.KEY_DEBUG_VIDEO_CALL, true);
-        int fps = mPrefs.getInt(Constant.KEY_DEBUG_FPS, 0);
-        String videoCodec = mPrefs.getString(Constant.KEY_DEBUG_VIDEO_CODEC, Constant.DEFAULT_VIDEO_CODEC);
         // videoWidth videoHeight 是给对方传视频 设置的参数
-        int videoWidth = 640;
-        int videoHeight = 480;
-        String videoResolution = mPrefs.getString(Constant.KEY_DEBUG_VIDEO_RESOLUTION, Constant.DEFAULT_VIDEO_RESOLUTION);
-        if (videoResolution.contains("720")) {
-            videoWidth = 1280;
-            videoHeight = 720;
-        } else if (videoResolution.contains("240")) {
-            videoWidth = 320;
-            videoHeight = 240;
+        peerConnectionParameters =new PeerConnectionClient.PeerConnectionParameters(true, false, false, 640, 480, 30, 0, VIDEO_CODEC, true, 0, AUDIO_CODEC,
+                        false, false, false, false, false, false, false);
+        peerConnectionClient = PeerConnectionClient.getInstance();
+        peerConnectionClient.createPeerConnectionFactory(
+                VideoCallActivity.this, peerConnectionParameters, VideoCallActivity.this);
+        VideoCapturer videoCapturer = null;
+        if (peerConnectionParameters.videoCallEnabled) {
+            videoCapturer = createVideoCapturer();
         }
-        String audioCodec = mPrefs.getString(Constant.KEY_DEBUG_AUDIO_CODEC, Constant.DEFAULT_AUDIO_CODEC);
-        boolean aec = mPrefs.getBoolean(Constant.KEY_DEBUG_AEC, false);
-        boolean ns = mPrefs.getBoolean(Constant.KEY_DEBUG_NS, false);
-        peerConnectionParameters = new PeerConnectionParameters(videoCallEnabled, videoWidth, videoHeight, fps, 0, videoCodec,
-                0, audioCodec, aec, ns);
+        LinkedList<PeerConnection.IceServer> iceServers = new LinkedList<>();
+        //TODO
+//        try {
+//            String iceServerConfig = mPrefs.getString(Constant.KEY_ICE_SERVICES, "");
+//            if (!StringUtils.isSpace(iceServerConfig)) {
+//                JSONObject json = new JSONObject(iceServerConfig);
+//                JSONArray jservers = json.getJSONArray(JsonSignalChannel.Field.iceServers.name());
+//                for (int i = 0; i < jservers.length(); i++) {
+//                    JSONObject jserver = jservers.getJSONObject(i);
+//                    iceServers.add(new PeerConnection.IceServer(jserver.getString(JsonSignalChannel.Field.urls.name()),
+//                            mPrefs.getString(Constant.KEY_DEVICE_ID, ""), WebSocketSignalClient.getPassword()));
+//                }
+//            }
+//        } catch (JSONException e) {
+//            Log.e(TAG, "JSON parse failed:" + e);
+//        }
+        if (iceServers.size() == 0) {
+            // 为了保证连接成功，先设置一些默认的ice_services TODO 默认的iceserver需要确认
 
-        App.getInstance().getHrP2PEngine().initPeerConnection(rootEglBase.getEglBaseContext(), peerConnectionParameters, localRender, remoteRenderers);
-        App.getInstance().getHrP2PEngine().addListener(hrp2PListener);
+        }
 
+        peerConnectionClient.createPeerConnection(rootEglBase.getEglBaseContext(), localRender,
+                remoteRenderers, videoCapturer, iceServers);
+
+        // 如果是主叫方，直接接受ice；如果是被叫方，同意发answer了，再接受主叫方发过来的ice
         if (mIsCaller == Constant.IS_CALLER_YES) {
-            App.getInstance().getHrP2PEngine().startTimer();
             mViewCall.setVisibility(View.VISIBLE);
             mViewOperation.setVisibility(View.INVISIBLE);
             mViewPrevAnswer.setVisibility(View.GONE);
-            mTvCallName.setText(mPeerName + " 拨通中...");
+            //TODO 设置名称 mTvCallName.setText(mPeerName + " 拨通中...");
             // Create offer. Offer SDP will be sent to answering client in
             // PeerConnectionEvents.onLocalDescription event.
-            Countly.sharedInstance().recordEvent(Constant.COUNTLY_CONNECTING_OFFER);
-            App.getInstance().getHrP2PEngine().makeCall(mGroupID, mPeerID);
+            peerConnectionClient.createOffer();
         } else {
             mViewCall.setVisibility(View.GONE);
             mViewOperation.setVisibility(View.VISIBLE);
             mViewPrevAnswer.setVisibility(View.VISIBLE);
-            mTvPeerName.setText(mPeerName + " 邀请你视频聊天");
+            //TODO 显示名称mTvPeerName.setText(mPeerName + " 邀请你视频聊天");
             startRing();
-
-            App.getInstance().getHrP2PEngine().setRemoteDescription(SessionDescription.Type.OFFER, mSdpStr);
+            if (!StringUtils.isSpace(mSdpStr)) {
+                mCanSendIce = true;
+                SessionDescription sdp = new SessionDescription(SessionDescription.Type.OFFER, mSdpStr);
+                peerConnectionClient.setRemoteDescription(sdp);
+                // Create answer. Answer SDP will be sent to offering client in
+                // PeerConnectionEvents.onLocalDescription event.
+//                peerConnectionClient.createPrAnswer();
+            }
         }
+
+        // Create and audio manager that will take care of audio routing,
+        // audio modes, audio device enumeration etc.
+        audioManager = AppRTCAudioManager.create(this, new Runnable() {
+            // This method will be called each time the audio state (number and
+            // type of devices) has been changed.
+            @Override
+            public void run() {
+            }
+        });
+        // Store existing audio settings and change audio mode to
+        // MODE_IN_COMMUNICATION for best possible VoIP performance.
+        Log.d(TAG, "Initializing the audio manager...");
+        audioManager.init();
     }
 
     /**
      * 初始化数据
      */
     private void initData() {
+        mIsCaller = Constant.IS_CALLER_YES;
+        // getIntent().getExtras().getInt(Constant.PARAM_IS_CALLER, Constant.IS_CALLER_YES);
+//        mGroupID = getIntent().getExtras().get(Constant.PARAM_GROUP_ID).toString();
+//        mPeerID = getIntent().getExtras().get(Constant.PARAM_PEER_ID).toString();
+//        mPeerName = getIntent().getExtras().get(Constant.PARAM_PEER_NAME).toString();
+//        if (mIsCaller != Constant.IS_CALLER_YES) {
+//            mSdpStr = getIntent().getExtras().get(Constant.PARAM_SDP).toString();
+//        }
     }
 
     @Override
@@ -538,11 +354,174 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         // 屏蔽返回键
     }
 
+    // -----Implementation of PeerConnectionClient.PeerConnectionEvents.---------
+    // Send local peer connection SDP and ICE candidates to remote party.
+    // All callbacks are invoked from peer connection client looper thread and
+    // are routed to UI thread.
+    @Override
+    public void onLocalDescription(final SessionDescription sdp) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (sdp == null) {
+                    return;
+                }
+                String type = sdp.type.name().toUpperCase();
+                if (SessionDescription.Type.OFFER.name().equals(type)) { // offer创建成功
+  //TODO 发送OFFER                  MessageUtil.sendOffer(sdp, mGroupID, mPeerID);
+                } else if (SessionDescription.Type.PRANSWER.name().equals(type)
+                        || SessionDescription.Type.ANSWER.name().equals(type)) {
+                    //TODO 发送answer MessageUtil.sendAnswer(sdp, mGroupID, mPeerID);
+                }
+                if (peerConnectionParameters.videoMaxBitrate > 0) {
+                    Log.d(TAG, "Set video maximum bitrate: " + peerConnectionParameters.videoMaxBitrate);
+                    peerConnectionClient.setVideoMaxBitrate(peerConnectionParameters.videoMaxBitrate);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onIceCandidate(final IceCandidate candidate) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mCanSendIce) {
+                    //TODO 发送ICE MessageUtil.sendICECandidate(candidate, mGroupID, mPeerID);
+                } else {
+                    mQueuedLocalCandidates.add(candidate);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onIceCandidatesRemoved(final IceCandidate[] candidates) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //IceCandiate 不做处理
+            }
+        });
+    }
+
+    @Override
+    public void onIceConnected() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mIsIceConnected = true;
+                callConnected();
+            }
+        });
+    }
+
+    @Override
+    public void onIceDisconnected() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mIsIceConnected = false;
+            }
+        });
+    }
+
+    @Override
+    public void onIceClosed() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mIsIceConnected = false;
+                disconnect();
+                finish();
+            }
+        });
+    }
+
+    @Override
+    public void onPeerConnectionClosed() {
+    }
+
+    @Override
+    public void onPeerConnectionStatsReady(final StatsReport[] reports) {
+        // 可以监听debug信息
+//        runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mIsIceConnected) {
+//                    hudFragment.updateEncoderStatistics(reports);
+//                }
+//            }
+//        });
+    }
+
+    @Override
+    public void onPeerConnectionError(final String description) {
+        // 处理错误
+//        reportError(description);
+    }
+
+    @Override
+    public void onPeerConnectionStatueChange(final PeerConnection.SignalingState newState) {
+    }
+
+    @Override
+    public void onIceStatueChange(final PeerConnection.IceConnectionState newState) {
+    }
+
+    private VideoCapturer createVideoCapturer() {
+        Log.d(TAG, "Creating capturer using camera1 API.");
+        VideoCapturer videoCapturer = createCameraCapturer(new Camera1Enumerator(false));
+        if (videoCapturer == null) {
+//            reportError("Failed to open camera");
+            return null;
+        }
+        return videoCapturer;
+    }
+
+    private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
+        final String[] deviceNames = enumerator.getDeviceNames();
+
+        // First, try to find front facing camera
+        Log.d(TAG, "Looking for front facing cameras.");
+        for (String deviceName : deviceNames) {
+            Log.d(TAG, deviceName + " : " + enumerator.getSupportedFormats(deviceName).toString());
+            if (enumerator.isFrontFacing(deviceName)) {
+                Log.d(TAG, "Creating front facing camera capturer.");
+                VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
+
+                if (videoCapturer != null) {
+                    return videoCapturer;
+                }
+            }
+        }
+
+        // Front facing camera not found, try something else
+        Log.d(TAG, "Looking for other cameras.");
+        for (String deviceName : deviceNames) {
+            if (!enumerator.isFrontFacing(deviceName)) {
+                Log.d(TAG, "Creating other camera capturer.");
+                VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
+
+                if (videoCapturer != null) {
+                    return videoCapturer;
+                }
+            }
+        }
+
+        return null;
+    }
 
     // Should be called from UI thread
     private void callConnected() {
+        if (peerConnectionClient == null) {
+            Log.w(TAG, "Call is connected in closed or error state");
+            return;
+        }
         // Update video view.
         updateVideoView();
+        // Enable statistics callback.
+        peerConnectionClient.enableStatsEvents(true, STAT_CALLBACK_PERIOD);
     }
 
     private void updateVideoView() {
@@ -567,7 +546,10 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
 
     // Disconnect from remote resources, dispose of local resources, and exit.
     private void disconnect() {
-
+        if (peerConnectionClient != null) {
+            peerConnectionClient.close();
+            peerConnectionClient = null;
+        }
         if (localRender != null) {
             localRender.release();
             localRender = null;
@@ -575,6 +557,10 @@ public class VideoCallActivity extends Activity implements View.OnClickListener 
         if (remoteRenderScreen != null) {
             remoteRenderScreen.release();
             remoteRenderScreen = null;
+        }
+        if (audioManager != null) {
+            audioManager.close();
+            audioManager = null;
         }
         if (mSnapshotRenderer != null) {
             mSnapshotRenderer.release();

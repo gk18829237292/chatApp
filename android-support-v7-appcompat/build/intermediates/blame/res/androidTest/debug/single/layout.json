@@ -16,12 +16,12 @@
         "source": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\bundles\\debug\\res\\layout\\abc_screen_content_include.xml"
     },
     {
-        "merged": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\abc_activity_chooser_view.xml",
-        "source": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\bundles\\debug\\res\\layout\\abc_activity_chooser_view.xml"
-    },
-    {
         "merged": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\abc_action_mode_bar.xml",
         "source": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\bundles\\debug\\res\\layout\\abc_action_mode_bar.xml"
+    },
+    {
+        "merged": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\abc_activity_chooser_view.xml",
+        "source": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\bundles\\debug\\res\\layout\\abc_activity_chooser_view.xml"
     },
     {
         "merged": "D:\\Graduate Design Project\\chatApp\\android-support-v7-appcompat\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout\\abc_action_bar_view_list_nav_layout.xml",

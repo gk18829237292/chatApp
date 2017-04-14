@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <com.hobot.p2p.webtrc.PercentFrameLayout
+    <com.gk.chatapp.p2p.PercentFrameLayout
         android:id="@+id/remote_video_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -12,9 +12,9 @@
             android:id="@+id/remote_video_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-    </com.hobot.p2p.webtrc.PercentFrameLayout>
+    </com.gk.chatapp.p2p.PercentFrameLayout>
 
-    <com.hobot.p2p.webtrc.PercentFrameLayout
+    <com.gk.chatapp.p2p.PercentFrameLayout
         android:id="@+id/local_video_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -24,131 +24,49 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"/>
-    </com.hobot.p2p.webtrc.PercentFrameLayout>
+    </com.gk.chatapp.p2p.PercentFrameLayout>
 
     <LinearLayout
         android:id="@+id/ll_operation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
-        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
         android:layout_marginBottom="4dp">
 
         <Button
             android:id="@+id/btn_changeCamera"
-            android:layout_width="80dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:layout_marginRight="10dp"
             android:visibility="gone"
             android:text="相机"/>
 
         <Button
             android:id="@+id/btn_snap"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="截屏"/>
 
         <Button
             android:id="@+id/btn_hung"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="挂断"/>
 
         <Button
             android:id="@+id/btn_mute"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="静音 关"/>
 
         <Button
             android:id="@+id/btn_hands_free"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="免提 开"/>
 
-        <Button
-            android:id="@+id/btn_showLog"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:text="隐藏log"/>
-
-        <Button
-            android:id="@+id/btn_debug"
-            android:layout_width="80dp"
-            android:layout_height="match_parent"
-            android:layout_marginTop="10dp"
-            android:text="debug"/>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/ll_log"
-        android:layout_width="match_parent"
-        android:layout_height="205dp"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="100dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tv_group_peers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:textSize="12sp"
-            android:textColor="@android:color/holo_orange_light"/>
-
-        <TextView
-            android:id="@+id/tv_connInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:textSize="12sp"
-            android:textColor="@color/corner_color"/>
-
-        <TextView
-            android:id="@+id/tv_iceInfo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="3dp"
-            android:textSize="12sp"
-            android:textColor="@color/corner_color"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <ListView
-                android:id="@+id/lv_logInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:dividerHeight="0dp"
-                android:layout_marginRight="5dp"
-                android:listSelector="@android:color/transparent"
-                android:cacheColorHint="@android:color/transparent"
-                android:scrollbars="none"/>
-
-            <ListView
-                android:id="@+id/lv_logReceiveInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:dividerHeight="0dp"
-                android:layout_marginLeft="5dp"
-                android:listSelector="@android:color/transparent"
-                android:cacheColorHint="@android:color/transparent"
-                android:scrollbars="none"/>
-        </LinearLayout>
-    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/rl_prev_answer"
@@ -191,7 +109,9 @@
     <RelativeLayout
         android:id="@+id/rl_call"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/tv_call_name"
@@ -212,9 +132,4 @@
             android:layout_centerHorizontal="true"
             android:text="挂断"/>
     </RelativeLayout>
-
-    <FrameLayout
-        android:id="@+id/hud_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
 </RelativeLayout>

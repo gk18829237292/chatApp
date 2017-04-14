@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 
 import com.gk.chatapp.R;
 import com.gk.chatapp.UserInfoActivity;
+import com.gk.chatapp.VideoCallActivity;
 import com.gk.chatapp.adapter.UserAdapter;
 import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
@@ -153,7 +154,8 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
         btn_call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getActivity(), VideoCallActivity.class);
+                startActivity(intent);
             }
         });
 
