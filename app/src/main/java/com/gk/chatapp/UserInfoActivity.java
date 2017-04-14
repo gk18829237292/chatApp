@@ -96,8 +96,10 @@ public class UserInfoActivity extends ActionBarActivity {
         changeEnable(false);
         if(flag){
             btn_change.setVisibility(View.VISIBLE);
+            getSupportActionBar().setTitle("个人中心");
         }else {
             btn_change.setVisibility(View.GONE);
+            getSupportActionBar().setTitle(et_nickname.getText().toString() +"个人信息");
         }
 
         //设置监听事件
@@ -210,6 +212,7 @@ public class UserInfoActivity extends ActionBarActivity {
         });
         bt3.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                pop.dismiss();
                 ll_popup.clearAnimation();
             }
         });

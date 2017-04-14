@@ -32,5 +32,8 @@ public class Constant {
     public static final int CAMERA_INT=1;
     public static final int PICTURE_INT=2;
 
+    public static final int IS_CALLER_YES = 0;
+    public static final int IS_CALLER_NO = 1;
+
 
 }

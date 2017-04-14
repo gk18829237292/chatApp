@@ -20,23 +20,17 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 
-import com.gk.chatapp.MainActivity;
 import com.gk.chatapp.R;
 import com.gk.chatapp.UserInfoActivity;
 import com.gk.chatapp.adapter.UserAdapter;
+import com.gk.chatapp.app.App;
+import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.model.DrawerItem;
-import com.gk.chatapp.utils.SocketIoUtils;
 import com.gk.chatapp.utils.UserStatus;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.socket.emitter.Emitter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -45,7 +39,6 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
     private static final String TAG = "UserListFragment";
 
-    private ListView mListView;
     private List<UserEntry> mUserEntry = new ArrayList<>();
     private SwipeRefreshLayout mItemContainer;
     private ListView userListView;
@@ -58,6 +51,8 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     LinearLayout ll_popup;
 
     private LayoutInflater inflater;
+
+    private int mClickPosition = -1;
 
     public UserListFragment() {
         // Required empty public constructor
@@ -82,13 +77,13 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         mItemContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.container_items);
         mItemContainer.setOnRefreshListener(this);
-
+        initPopupWindow(drawTag);
         userListView = (ListView) rootView.findViewById(R.id.list_view);
         userListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 userListView.setItemChecked(position,false);
-                showPopupWindow("","","","");
+                mClickPosition = position;
                 ll_popup.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.activity_translate_in));
                 pop.showAtLocation(view, Gravity.BOTTOM, 0, 0);
             }
@@ -107,7 +102,6 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onRefresh() {
         Log.d(TAG,"refresh");
         mItemContainer.setRefreshing(true);
-//        SocketIoUtils.sendMessage("updateInfo");
         updateComplete();
         mItemContainer.setRefreshing(false);
     }
@@ -125,6 +119,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
             mUserEntry.addAll(UserStatus.getUserList(drawTag));
             userAdapter.notifyDataSetChanged();
             this.drawTag = drawTag;
+            initPopupWindow(drawTag);
         }
     }
 
@@ -132,9 +127,9 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
         return drawTag;
     }
 
-    public void showPopupWindow(final String account,final String nickName,final String signature,final String image){
+    public void initPopupWindow(int drawTag){
         pop = new PopupWindow(getActivity());
-        View view = inflater.inflate(R.layout.item_popupwindows, null);
+        View view = inflater.inflate(R.layout.item_popup_main_activity, null);
         ll_popup = (LinearLayout) view.findViewById(R.id.ll_popup);
         pop.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         pop.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -143,9 +138,10 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
         pop.setOutsideTouchable(true);
         pop.setContentView(view);
         RelativeLayout parent = (RelativeLayout) view.findViewById(R.id.parent);
-        Button bt1 = (Button) view.findViewById(R.id.item_popupwindows_camera);
-        Button bt2 = (Button) view.findViewById(R.id.item_popupwindows_Photo);
-        Button bt3 = (Button) view.findViewById(R.id.item_popupwindows_cancel);
+        Button btn_call = (Button) view.findViewById(R.id.item_popupwindows_call);
+        Button btn_info = (Button) view.findViewById(R.id.item_popupwindows_info);
+        Button btn_remove= (Button) view.findViewById(R.id.item_popupwindows_remove);
+        Button btn_cancel = (Button) view.findViewById(R.id.item_popupwindows_cancel);
         parent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -153,23 +149,45 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
                 ll_popup.clearAnimation();
             }
         });
-        //视频通话
-        bt1.setOnClickListener(new View.OnClickListener() {
+
+        btn_call.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
 
             }
         });
-        //查看对方资料
-        bt2.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
 
+        btn_info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"to show info");
+                if(mClickPosition >= 0 && mClickPosition < mUserEntry.size()){
+                    UserEntry entry =mUserEntry.get(mClickPosition);
+                    Intent intent = new Intent(getActivity(), UserInfoActivity.class);
+                    intent.putExtra(Constant.CAN_EDIT,false);
+                    intent.putExtra(Constant.ACCOUNT,entry.getAccount());
+                    intent.putExtra(Constant.NICKNAME,entry.getNickName());
+                    intent.putExtra(Constant.SIGNATURE,entry.getSignature());
+                    intent.putExtra(Constant.URL_STR,entry.getImg_url());
+                    startActivity(intent);
+                }
             }
         });
-        bt3.setOnClickListener(new View.OnClickListener() {
+
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
+                pop.dismiss();
                 ll_popup.clearAnimation();
             }
         });
+
+        if(drawTag == DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER){
+            view.findViewById(R.id.ll_recent).setVisibility(View.VISIBLE);
+        }else{
+            view.findViewById(R.id.ll_recent).setVisibility(View.GONE);
+        }
+
     }
 
 }
