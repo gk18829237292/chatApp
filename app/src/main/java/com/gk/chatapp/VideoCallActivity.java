@@ -42,6 +42,7 @@ import org.webrtc.VideoRenderer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -149,10 +150,11 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //如果接受请求,则给对方发offer.
             case R.id.btn_accept:
                 stopRing();
                 if (peerConnectionClient != null) {
-                    peerConnectionClient.createAnswer();
+                    peerConnectionClient.createOffer();
                 }
                 mViewPrevAnswer.setVisibility(View.GONE);
                 break;
@@ -312,7 +314,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
             // PeerConnectionEvents.onLocalDescription event.
 //            peerConnectionClient.createOffer();
             //发送init 消息
-            SocketIoUtils.sendMessage("init",mPeerAccount, App.getInstance().getMyEntry().getAccount());
+            SocketIoUtils.sendMessage("init",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
         } else {
             mViewCall.setVisibility(View.GONE);
             mViewOperation.setVisibility(View.VISIBLE);
@@ -342,31 +344,12 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
      * 初始化数据
      */
     private void initData() {
-        mIsCaller = Constant.IS_CALLER_YES;
-        // getIntent().getExtras().getInt(Constant.PARAM_IS_CALLER, Constant.IS_CALLER_YES);
-//        mGroupID = getIntent().getExtras().get(Constant.PARAM_GROUP_ID).toString();
-//        mPeerID = getIntent().getExtras().get(Constant.PARAM_PEER_ID).toString();
-//        mPeerName = getIntent().getExtras().get(Constant.PARAM_PEER_NAME).toString();
-//        if (mIsCaller != Constant.IS_CALLER_YES) {
-//            mSdpStr = getIntent().getExtras().get(Constant.PARAM_SDP).toString();
-//        }
-
-        SocketIoUtils.registerListener("init_result", new Emitter.Listener() {
-            @Override
-            public void call(Object... args) {
-                boolean result = (boolean) args[0];
-                if(result){
-                    //对方同意
-                }else{
-                    //对方拒绝
-                }
-            }
-        });
+        mIsCaller=getIntent().getExtras().getInt(Constant.PARAM_IS_CALLER, Constant.IS_CALLER_YES);
+        mPeerAccount = getIntent().getStringExtra(Constant.ACCOUNT);
     }
 
     @Override
     public void onBackPressed() {
-        // 屏蔽返回键
     }
 
     // -----Implementation of PeerConnectionClient.PeerConnectionEvents.---------
@@ -383,9 +366,11 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
                 }
                 String type = sdp.type.name().toUpperCase();
                 if (SessionDescription.Type.OFFER.name().equals(type)) { // offer创建成功
+                    SocketIoUtils.sendMessage("offer",App.getInstance().getMyEntry().getAccount(),mPeerAccount,sdp.description);
   //TODO 发送OFFER                  MessageUtil.sendOffer(sdp, mGroupID, mPeerID);
                 } else if (SessionDescription.Type.PRANSWER.name().equals(type)
                         || SessionDescription.Type.ANSWER.name().equals(type)) {
+                    SocketIoUtils.sendMessage("answer",App.getInstance().getMyEntry().getAccount(),mPeerAccount,sdp.description);
                     //TODO 发送answer MessageUtil.sendAnswer(sdp, mGroupID, mPeerID);
                 }
                 if (peerConnectionParameters.videoMaxBitrate > 0) {

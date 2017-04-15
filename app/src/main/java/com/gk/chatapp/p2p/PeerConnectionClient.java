@@ -1123,31 +1123,12 @@ public class PeerConnectionClient {
                 reportError("Multiple SDP create.");
                 return;
             }
-            String sdpDescription = origSdp.description;
-            Log.d(TAG, "Local raw SDP: " + sdpDescription);
-            if (preferIsac) {
-                sdpDescription = preferCodec(sdpDescription, AUDIO_CODEC_ISAC, true);
-            }
-            if (videoCallEnabled) {
-                sdpDescription = preferCodec(sdpDescription, preferredVideoCodec, false);
-            }
 
-            SessionDescription.Type type = origSdp.type;
-//            // Provisional answer, set a=inactive & set sdp type to pranswer.
-//            if (SessionDescription.Type.ANSWER.name().equals(origSdp.type.name().toUpperCase()) && isPrAnswer) {
-//                type = SessionDescription.Type.PRANSWER;
-////                sdpDescription = sdpDescription.replace("a=sendrecv", "a=inactive");
-//            }
-
-            final SessionDescription sdp = new SessionDescription(type, sdpDescription);
-            localSdp = sdp;
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
                     if (peerConnection != null && !isError) {
-                        Log.d(TAG, "Set local SDP from " + sdp.type);
-                        Log.d(TAG, "Local prefer SDP: " + sdp.description);
-                        peerConnection.setLocalDescription(sdpObserver, sdp);
+                        peerConnection.setLocalDescription(sdpObserver, origSdp);
                     }
                 }
             });

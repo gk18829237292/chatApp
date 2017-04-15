@@ -16,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,6 +49,7 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -56,6 +58,8 @@ import io.socket.emitter.Emitter;
 import static com.gk.chatapp.model.DrawerItem.DRAWER_ITEM_TAG_LOGOUT;
 
 public class MainActivity extends ActionBarActivity {
+
+    private static final String TAG = "MainActivity";
 
     private DrawerLayout mDrawLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -162,13 +166,25 @@ public class MainActivity extends ActionBarActivity {
 //        mSpref = new SprefUtils(this);
 //        Set<String> users = mSpref.getStringSet(Constant.RECENTUSER,null);
 //        UserStatus.addRecentUser(users);
-
+        SocketIoUtils.registerListener("init", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, Arrays.toString(args));
+                String src = (String) args[0];
+                String des = (String) args[1];
+                Intent intent = new Intent(MainActivity.this, VideoCallActivity.class);
+                intent.putExtra(Constant.PARAM_IS_CALLER,Constant.IS_CALLER_NO);
+                intent.putExtra(Constant.ACCOUNT,des);
+                startActivity(intent);
+            }
+        });
 
     }
 
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
     private void selectItem(int position,int drawTag){
         if (drawTag == DRAWER_ITEM_TAG_LOGOUT){
+            App.getInstance().setMyEntry(null);
             logout();
             return;
         }
