@@ -22,6 +22,7 @@ import com.gk.chatapp.p2p.PeerConnectionClient;
 import com.gk.chatapp.p2p.PercentFrameLayout;
 import com.gk.chatapp.p2p.audiomanager.AppRTCAudioManager;
 import com.gk.chatapp.utils.SocketIoUtils;
+import com.gk.chatapp.utils.ToastUtils;
 
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
@@ -98,9 +99,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Set window styles for fullscreen-window size. Needs to be done before
-        // adding content.
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         getWindow().addFlags(LayoutParams.FLAG_FULLSCREEN | LayoutParams.FLAG_KEEP_SCREEN_ON
                 | LayoutParams.FLAG_SHOW_WHEN_LOCKED | LayoutParams.FLAG_TURN_SCREEN_ON);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -136,6 +135,13 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         stopRing();
         disconnect();
         rootEglBase.release();
+
+        SocketIoUtils.unRegisterListener("ice");
+        SocketIoUtils.unRegisterListener("offer");
+        SocketIoUtils.unRegisterListener("answer");
+        SocketIoUtils.unRegisterListener("reject");
+        SocketIoUtils.unRegisterListener("hangup");
+
         super.onDestroy();
     }
 
@@ -151,9 +157,12 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
                 mViewPrevAnswer.setVisibility(View.GONE);
                 break;
             case R.id.btn_refuse:
+                SocketIoUtils.sendMessage("reject",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
+                finish();
+                break;
             case R.id.btn_close:
                 //TODO close完善
-//                MessageUtil.sendCloseStream(mGroupID, mPeerID);
+                SocketIoUtils.sendMessage("hangup",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
                 finish();
                 break;
             case R.id.btn_changeCamera:
@@ -189,6 +198,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
             case R.id.btn_hung:
                 // 挂断，不离开房间
 //TODO                MessageUtil.sendCloseStream(mGroupID, mPeerID);
+                SocketIoUtils.sendMessage("hangup",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
                 finish();
                 break;
 
@@ -298,7 +308,13 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
             // PeerConnectionEvents.onLocalDescription event.
 //            peerConnectionClient.createOffer();
             //发送init 消息
-            SocketIoUtils.sendMessage("init",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
+            if(peerConnectionClient != null){
+                SocketIoUtils.sendMessage("init",App.getInstance().getMyEntry().getAccount(),mPeerAccount);
+            }else{
+                finish();
+                ToastUtils.showShortToast(getApplicationContext(),"error");
+            }
+
         } else {
             mViewCall.setVisibility(View.GONE);
             mViewOperation.setVisibility(View.VISIBLE);
@@ -368,6 +384,41 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
                 String des = (String) args[1];
                 IceCandidate ice = new IceCandidate((String)args[2],(int)args[3],(String) args[4]);
                 peerConnectionClient.addRemoteIceCandidate(ice);
+            }
+        });
+
+        SocketIoUtils.registerListener("reject", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String src = (String) args[0];
+                String des = (String) args[1];
+                if(src.equals(mPeerAccount) && des.equals(App.getInstance().getMyEntry().getAccount())){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtils.showShortToast(getApplicationContext(),"对方拒接");
+                            finish();
+                        }
+                    });
+                }
+            }
+        });
+
+        SocketIoUtils.registerListener("hangup", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String src = (String) args[0];
+                String des = (String) args[1];
+                if(src.equals(mPeerAccount) && des.equals(App.getInstance().getMyEntry().getAccount())){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtils.showShortToast(getApplicationContext(),"对方挂断");
+                            finish();
+                        }
+                    });
+
+                }
             }
         });
     }
@@ -477,7 +528,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     @Override
     public void onPeerConnectionError(final String description) {
         // 处理错误
-//        reportError(description);
+        Log.e(TAG,"onPeerConnectionError : " + description);
     }
 
     @Override
@@ -597,24 +648,24 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     }
 
     private void startRing() {
-        mMediaPlayer = MediaPlayer.create(this, getSystemDefultRingtoneUri());
-        mMediaPlayer.setLooping(true);
-        try {
-            mMediaPlayer.prepare();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mMediaPlayer.start();
-
-        try {
-            mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            long[] pattern = {800, 150, 400, 130}; // OFF/ON/OFF/ON...
-            mVibrator.vibrate(pattern, 2);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        mMediaPlayer = MediaPlayer.create(this, getSystemDefultRingtoneUri());
+//        mMediaPlayer.setLooping(true);
+//        try {
+//            mMediaPlayer.prepare();
+//        } catch (IllegalStateException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+////        mMediaPlayer.start();
+//
+//        try {
+//            mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+//            long[] pattern = {800, 150, 400, 130}; // OFF/ON/OFF/ON...
+//            mVibrator.vibrate(pattern, 2);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void stopRing() {
