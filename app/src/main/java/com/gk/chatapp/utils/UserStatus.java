@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,7 +86,27 @@ public class UserStatus {
             @Override
             public void call(Object... args) {
                 try {
-                    updateInfo(new JSONArray(args[0].toString()),new JSONArray(args[1].toString()));
+                    JSONArray userList = new JSONArray(args[0].toString());
+                    allUserList.clear();
+                    Log.d(TAG,userList.toString());
+                    for(int i =0;i<userList.length();i++){
+                        JSONObject jsonObject = userList.getJSONObject(i);
+                        UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),jsonObject.getString(Constant.IMAGE),false);
+                        allUserList.put(entry.getAccount(),entry);
+                    }
+                    String str = args[1].toString();
+                    JSONObject userListOnline = new JSONObject(str);
+                    onLineUserList.clear();
+                    Iterator<String> iterator = userListOnline.keys();
+                    while (iterator.hasNext()){
+                        String account = iterator.next();
+                        if(!allUserList.containsKey(account)) {
+                            continue;
+                        }
+                        allUserList.get(account).setOnLine(true);
+                        onLineUserList.put(account,allUserList.get(account));
+                    }
+                    removeMySelf();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -117,9 +138,11 @@ public class UserStatus {
     }
 
     public static void onLogin(String account){
-        UserEntry entry = allUserList.get(account);
-        entry.setOnLine(true);
-        onLineUserList.put(account,entry);
+        if(allUserList.containsKey(account)){
+            UserEntry entry = allUserList.get(account);
+            entry.setOnLine(true);
+            onLineUserList.put(account,entry);
+        }
     }
 
     public static void onLogout(String account){
@@ -150,25 +173,14 @@ public class UserStatus {
         }
     }
 
-    public static void updateInfo(JSONArray userList,JSONArray userListOnline) throws JSONException {
-        allUserList.clear();
-        for(int i =0;i<userList.length();i++){
-            JSONObject jsonObject = userList.getJSONObject(i);
-            UserEntry entry = new UserEntry(jsonObject.getString(Constant.ACCOUNT),jsonObject.getString(Constant.NICKNAME),jsonObject.getString(Constant.SIGNATURE),jsonObject.getString(Constant.IMAGE),false);
-            allUserList.put(entry.getAccount(),entry);
+    public static void main(String[] args){
+        String str="[{\"gk\":\"1\"}]";
+        try {
+            JSONObject jsonArray = new JSONObject(str);
+            System.out.println(jsonArray.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
-        onLineUserList.clear();
-        for(int i = 0; i< userListOnline.length();i++){
-            String account = userListOnline.getString(i);
-            if(!allUserList.containsKey(account)) {
-                continue;
-            }
-            allUserList.get(account).setOnLine(true);
-            onLineUserList.put(account,allUserList.get(account));
-        }
-
-        removeMySelf();
     }
 
 }
