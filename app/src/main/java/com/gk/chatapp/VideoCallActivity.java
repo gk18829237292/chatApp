@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,6 +37,7 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoRenderer;
 
 import java.io.IOException;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,8 +61,8 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     private static final int LOCAL_WIDTH_CONNECTING = 100;
     private static final int LOCAL_HEIGHT_CONNECTING = 100;
     // Local preview screen position after call is connected.
-    private static final int LOCAL_X_CONNECTED = 2;
-    private static final int LOCAL_Y_CONNECTED = 1;
+    private static final int LOCAL_X_CONNECTED = 75;
+    private static final int LOCAL_Y_CONNECTED = 0;
     private static final int LOCAL_WIDTH_CONNECTED = 22;
     private static final int LOCAL_HEIGHT_CONNECTED = 35;
     // Remote video screen position
@@ -108,7 +110,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         setContentView(R.layout.activity_video_call);
 
         mIsIceConnected = false;
-        scalingType = ScalingType.SCALE_ASPECT_BALANCED;
+        scalingType = ScalingType.SCALE_ASPECT_FILL;
         initData();
         initView();
     }
@@ -126,9 +128,9 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     protected void onPause() {
         super.onPause();
         // Don't stop the video when using screencapture to allow user to show other apps to the remote end.
-//        if (peerConnectionClient != null) {
-//            peerConnectionClient.stopVideoSource();
-//        }
+        if (peerConnectionClient != null) {
+            peerConnectionClient.stopVideoSource();
+        }
     }
 
     @Override
@@ -343,10 +345,19 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         SocketIoUtils.registerListener("offer", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
+                Log.d(TAG,"offer");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mViewCall.setVisibility(View.GONE);
+                        mViewOperation.setVisibility(View.VISIBLE);
+                    }
+                });
                 String src = (String) args[0];
                 String des = (String) args[1];
                 SessionDescription sdp = new SessionDescription(SessionDescription.Type.OFFER, (String) args[2]);
                 peerConnectionClient.setRemoteDescription(sdp);
+                peerConnectionClient.createAnswer();
             }
         });
 
@@ -390,11 +401,9 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
                 String type = sdp.type.name().toUpperCase();
                 if (SessionDescription.Type.OFFER.name().equals(type)) { // offer创建成功
                     SocketIoUtils.sendMessage("offer",App.getInstance().getMyEntry().getAccount(),mPeerAccount,sdp.description);
-  //TODO 发送OFFER                  MessageUtil.sendOffer(sdp, mGroupID, mPeerID);
                 } else if (SessionDescription.Type.PRANSWER.name().equals(type)
                         || SessionDescription.Type.ANSWER.name().equals(type)) {
                     SocketIoUtils.sendMessage("answer",App.getInstance().getMyEntry().getAccount(),mPeerAccount,sdp.description);
-                    //TODO 发送answer MessageUtil.sendAnswer(sdp, mGroupID, mPeerID);
                 }
                 if (peerConnectionParameters.videoMaxBitrate > 0) {
                     Log.d(TAG, "Set video maximum bitrate: " + peerConnectionParameters.videoMaxBitrate);
@@ -409,8 +418,8 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-            //TODO 发送ICE MessageUtil.sendICECandidate(candidate, mGroupID, mPeerID);
-            SocketIoUtils.sendMessage("ice",App.getInstance().getMyEntry().getAccount(),mPeerAccount,candidate.sdpMid,candidate.sdpMLineIndex,candidate.sdp);
+            SocketIoUtils.sendMessage("ice",App.getInstance().getMyEntry().getAccount(),
+                    mPeerAccount,candidate.sdpMid,candidate.sdpMLineIndex,candidate.sdp);
             }
         });
     }

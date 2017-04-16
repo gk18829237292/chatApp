@@ -10,8 +10,8 @@
 
         <org.webrtc.SurfaceViewRenderer
             android:id="@+id/remote_video_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </com.gk.chatapp.p2p.PercentFrameLayout>
 
     <com.gk.chatapp.p2p.PercentFrameLayout
@@ -21,46 +21,47 @@
 
         <org.webrtc.SurfaceViewRenderer
             android:id="@+id/local_video_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </com.gk.chatapp.p2p.PercentFrameLayout>
 
     <LinearLayout
         android:id="@+id/ll_operation"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
-        android:layout_marginBottom="4dp">
-
+        android:orientation="horizontal">
         <Button
             android:id="@+id/btn_changeCamera"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:text="相机"/>
 
         <Button
             android:id="@+id/btn_snap"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="截屏"/>
 
         <Button
             android:id="@+id/btn_hung"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="挂断"/>
 
         <Button
             android:id="@+id/btn_mute"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="静音 关"/>
 
         <Button
             android:id="@+id/btn_hands_free"
+            android:layout_weight="1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="免提 开"/>

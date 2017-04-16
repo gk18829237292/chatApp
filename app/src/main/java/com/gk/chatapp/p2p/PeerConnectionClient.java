@@ -1123,7 +1123,7 @@ public class PeerConnectionClient {
                 reportError("Multiple SDP create.");
                 return;
             }
-
+            localSdp = origSdp;
             executor.execute(new Runnable() {
                 @Override
                 public void run() {

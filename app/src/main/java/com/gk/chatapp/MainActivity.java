@@ -174,7 +174,7 @@ public class MainActivity extends ActionBarActivity {
                 String des = (String) args[1];
                 Intent intent = new Intent(MainActivity.this, VideoCallActivity.class);
                 intent.putExtra(Constant.PARAM_IS_CALLER,Constant.IS_CALLER_NO);
-                intent.putExtra(Constant.ACCOUNT,des);
+                intent.putExtra(Constant.ACCOUNT,src);
                 startActivity(intent);
             }
         });
