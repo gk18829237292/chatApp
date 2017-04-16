@@ -20,7 +20,6 @@ import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.p2p.PeerConnectionClient;
 import com.gk.chatapp.p2p.PercentFrameLayout;
-import com.gk.chatapp.p2p.SnapshotVideoRenderer;
 import com.gk.chatapp.p2p.audiomanager.AppRTCAudioManager;
 import com.gk.chatapp.utils.SocketIoUtils;
 
@@ -85,7 +84,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
 //    private String mSdpStr;
     private boolean mMicEnabled = true;
     private boolean mIsIceConnected;
-    private SnapshotVideoRenderer mSnapshotRenderer;
     private boolean mCallControlFragmentVisible = true;
     private boolean mIsMirror = true;
     private View mViewCall, mViewPrevAnswer, mViewOperation;
@@ -193,11 +191,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
 //TODO                MessageUtil.sendCloseStream(mGroupID, mPeerID);
                 finish();
                 break;
-            case R.id.btn_snap:
-                if (mSnapshotRenderer != null) {
-                    mSnapshotRenderer.takeSnapshot();
-                }
-                break;
+
         }
     }
 
@@ -250,9 +244,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         localRender.init(rootEglBase.getEglBaseContext(), null);
         remoteRenderScreen.init(rootEglBase.getEglBaseContext(), null);
 
-        // Create snapshot renderers.
-        mSnapshotRenderer = new SnapshotVideoRenderer("/hobot/snapshot/", 480, 640, rootEglBase.getEglBaseContext());
-        remoteRenderers.add(mSnapshotRenderer);
+
 
         localRender.setZOrderMediaOverlay(true);
         updateVideoView();
@@ -590,10 +582,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         if (audioManager != null) {
             audioManager.close();
             audioManager = null;
-        }
-        if (mSnapshotRenderer != null) {
-            mSnapshotRenderer.release();
-            mSnapshotRenderer = null;
         }
     }
 

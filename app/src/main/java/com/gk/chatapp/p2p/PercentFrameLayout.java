@@ -25,6 +25,7 @@ public class PercentFrameLayout extends ViewGroup {
   private int yPercent = 0;
   private int widthPercent = 100;
   private int heightPercent = 100;
+  private boolean mIsTaskPicture = false;
 
   public PercentFrameLayout(Context context) {
     super(context);
@@ -55,12 +56,12 @@ public class PercentFrameLayout extends ViewGroup {
     final int width = getDefaultSize(Integer.MAX_VALUE, widthMeasureSpec);
     final int height = getDefaultSize(Integer.MAX_VALUE, heightMeasureSpec);
     setMeasuredDimension(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
-        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 
     final int childWidthMeasureSpec =
-        MeasureSpec.makeMeasureSpec(width * widthPercent / 100, MeasureSpec.AT_MOST);
+            MeasureSpec.makeMeasureSpec(width * widthPercent / 100, MeasureSpec.AT_MOST);
     final int childHeightMeasureSpec =
-        MeasureSpec.makeMeasureSpec(height * heightPercent / 100, MeasureSpec.AT_MOST);
+            MeasureSpec.makeMeasureSpec(height * heightPercent / 100, MeasureSpec.AT_MOST);
     for (int i = 0; i < getChildCount(); ++i) {
       final View child = getChildAt(i);
       if (child.getVisibility() != GONE) {
