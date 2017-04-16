@@ -22,12 +22,7 @@ import com.gk.chatapp.p2p.PercentFrameLayout;
 import com.gk.chatapp.p2p.SnapshotVideoRenderer;
 import com.gk.chatapp.p2p.audiomanager.AppRTCAudioManager;
 import com.gk.chatapp.utils.SocketIoUtils;
-import com.gk.chatapp.utils.SprefUtils;
-import com.gk.chatapp.utils.StringUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.EglBase;
@@ -42,7 +37,6 @@ import org.webrtc.VideoRenderer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,13 +88,11 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     private boolean mIsMirror = true;
     private View mViewCall, mViewPrevAnswer, mViewOperation;
 
-    private boolean mCanSendIce = false;
     private AppRTCAudioManager audioManager = null;
     private MediaPlayer mMediaPlayer;
     private Vibrator mVibrator;
 
     private TextView mTvCallName,mTvPeerName;
-
     private String mPeerAccount;
 
     @Override
@@ -274,8 +266,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         peerConnectionParameters =new PeerConnectionClient.PeerConnectionParameters(true, false, false, 640, 480, 30, 0, VIDEO_CODEC, true, 0, AUDIO_CODEC,
                         false, false, false, false, false, false, false);
         peerConnectionClient = PeerConnectionClient.getInstance();
-        peerConnectionClient.createPeerConnectionFactory(
-                VideoCallActivity.this, peerConnectionParameters, VideoCallActivity.this);
+        peerConnectionClient.createPeerConnectionFactory(VideoCallActivity.this, peerConnectionParameters, VideoCallActivity.this);
         VideoCapturer videoCapturer = null;
         if (peerConnectionParameters.videoCallEnabled) {
             videoCapturer = createVideoCapturer();
@@ -298,7 +289,8 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
 //        }
         if (iceServers.size() == 0) {
             // 为了保证连接成功，先设置一些默认的ice_services TODO 默认的iceserver需要确认
-
+            iceServers.add(new PeerConnection.IceServer("stun:23.21.150.121"));
+            iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
         }
 
         peerConnectionClient.createPeerConnection(rootEglBase.getEglBaseContext(), localRender,
@@ -334,8 +326,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         // Create and audio manager that will take care of audio routing,
         // audio modes, audio device enumeration etc.
         audioManager = AppRTCAudioManager.create(this, null);
-        // Store existing audio settings and change audio mode to
-        // MODE_IN_COMMUNICATION for best possible VoIP performance.
         Log.d(TAG, "Initializing the audio manager...");
         audioManager.init();
     }
@@ -346,6 +336,39 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     private void initData() {
         mIsCaller=getIntent().getExtras().getInt(Constant.PARAM_IS_CALLER, Constant.IS_CALLER_YES);
         mPeerAccount = getIntent().getStringExtra(Constant.ACCOUNT);
+
+        //A 呼叫B
+        //A 发送init 给B
+        //B 接听后 发送offer 给A
+        SocketIoUtils.registerListener("offer", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String src = (String) args[0];
+                String des = (String) args[1];
+                SessionDescription sdp = new SessionDescription(SessionDescription.Type.OFFER, (String) args[2]);
+                peerConnectionClient.setRemoteDescription(sdp);
+            }
+        });
+
+        SocketIoUtils.registerListener("answer", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String src = (String) args[0];
+                String des = (String) args[1];
+                SessionDescription sdp = new SessionDescription(SessionDescription.Type.ANSWER, (String) args[2]);
+                peerConnectionClient.setRemoteDescription(sdp);
+            }
+        });
+
+        SocketIoUtils.registerListener("ice", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String src = (String) args[0];
+                String des = (String) args[1];
+                IceCandidate ice = new IceCandidate((String)args[2],(int)args[3],(String) args[4]);
+                peerConnectionClient.addRemoteIceCandidate(ice);
+            }
+        });
     }
 
     @Override
@@ -386,10 +409,8 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mCanSendIce) {
-                    //TODO 发送ICE MessageUtil.sendICECandidate(candidate, mGroupID, mPeerID);
-                } else {
-                }
+            //TODO 发送ICE MessageUtil.sendICECandidate(candidate, mGroupID, mPeerID);
+            SocketIoUtils.sendMessage("ice",App.getInstance().getMyEntry().getAccount(),mPeerAccount,candidate.sdpMid,candidate.sdpMLineIndex,candidate.sdp);
             }
         });
     }

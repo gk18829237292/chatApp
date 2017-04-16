@@ -154,6 +154,8 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
         btn_call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pop.dismiss();
+                ll_popup.clearAnimation();
                 Intent intent = new Intent(getActivity(), VideoCallActivity.class);
                 intent.putExtra(Constant.PARAM_IS_CALLER,Constant.IS_CALLER_YES);
                 intent.putExtra(Constant.ACCOUNT,mUserEntry.get(mClickPosition).getAccount());
