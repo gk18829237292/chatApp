@@ -83,6 +83,11 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         prepareNaigationDrawerItems();
+
+        if(App.getInstance().getMyEntry() == null){
+            logout();
+        }
+
         initView();
         initData();
         //TODO 看代码 看看作用
@@ -184,6 +189,7 @@ public class MainActivity extends ActionBarActivity {
     //TODO 这里做修改 分两个Fragment ,一个是全部 一个是不分
     private void selectItem(int position,int drawTag){
         if (drawTag == DRAWER_ITEM_TAG_LOGOUT){
+            SocketIoUtils.sendMessage("logout",App.getInstance().getMyEntry().getAccount());
             App.getInstance().setMyEntry(null);
             logout();
             return;
@@ -254,10 +260,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void logout(){
-        SocketIoUtils.sendMessage("logout",App.getInstance().getMyEntry().getAccount());
         Intent intent= new Intent(MainActivity.this,LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.putExtra("flag",true);
         startActivity(intent);
     }
 

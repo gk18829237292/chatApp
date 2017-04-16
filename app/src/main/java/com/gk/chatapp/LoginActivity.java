@@ -93,8 +93,6 @@ public class LoginActivity extends Activity {
         Intent intent = getIntent();
         account = intent.getStringExtra(Constant.ACCOUNT);
         password = intent.getStringExtra(Constant.PASSWORD);
-        Log.d(TAG,"account : " + account);
-        Log.d(TAG,"password : " + password);
         if (account != null && password != null){
             tv_account.setText(account);
             tv_password.setText(password);

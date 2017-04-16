@@ -75,7 +75,7 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
     private SurfaceViewRenderer remoteRenderScreen;
     private PercentFrameLayout localRenderLayout;
     private PercentFrameLayout remoteRenderLayout;
-    private Button mBtnMute, mBtnHung, mBtnSnap, mBtnChangeCamera, mBtnClose, mBtnAccept, mBtnHandsFree;
+    private Button mBtnMute, mBtnHung, mBtnChangeCamera, mBtnClose, mBtnAccept, mBtnHandsFree;
     private PeerConnectionClient peerConnectionClient = null;
     private PeerConnectionClient.PeerConnectionParameters peerConnectionParameters;
     private ScalingType scalingType;
@@ -210,7 +210,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         mBtnChangeCamera = (Button) findViewById(R.id.btn_changeCamera);
         mBtnMute = (Button) findViewById(R.id.btn_mute);
         mBtnHung = (Button) findViewById(R.id.btn_hung);
-        mBtnSnap = (Button) findViewById(R.id.btn_snap);
         mViewCall = findViewById(R.id.rl_call);
         mViewPrevAnswer = findViewById(R.id.rl_prev_answer);
         mViewOperation = findViewById(R.id.ll_operation);
@@ -222,7 +221,6 @@ public class VideoCallActivity extends Activity implements View.OnClickListener,
         mBtnMute.setOnClickListener(this);
         mBtnHandsFree.setOnClickListener(this);
         mBtnHung.setOnClickListener(this);
-        mBtnSnap.setOnClickListener(this);
         mBtnChangeCamera.setOnClickListener(this);
 
         localRender.setOnClickListener(new View.OnClickListener() {
