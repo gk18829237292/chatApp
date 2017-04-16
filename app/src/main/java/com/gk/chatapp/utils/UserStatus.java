@@ -173,14 +173,4 @@ public class UserStatus {
         }
     }
 
-    public static void main(String[] args){
-        String str="[{\"gk\":\"1\"}]";
-        try {
-            JSONObject jsonArray = new JSONObject(str);
-            System.out.println(jsonArray.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
 }
