@@ -167,7 +167,9 @@ public class MainActivity extends ActionBarActivity {
 
 
     private void initData(){
-        UserStatus.removeMySelf();
+        SocketIoUtils.sendMessage("getAllUser","");
+//        UserStatus.removeMySelf();
+//        UserStatus.fillRecent();
 //        mSpref = new SprefUtils(this);
 //        Set<String> users = mSpref.getStringSet(Constant.RECENTUSER,null);
 //        UserStatus.addRecentUser(users);
@@ -191,6 +193,7 @@ public class MainActivity extends ActionBarActivity {
         if (drawTag == DRAWER_ITEM_TAG_LOGOUT){
             SocketIoUtils.sendMessage("logout",App.getInstance().getMyEntry().getAccount());
             App.getInstance().setMyEntry(null);
+            UserStatus.logout();
             logout();
             return;
         }

@@ -6,8 +6,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.utils.SocketIoUtils;
+import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.UserStatus;
 
 /**
@@ -20,6 +22,7 @@ public class App extends Application{
 
     private static App mInstance;
     public static synchronized App getInstance(){return mInstance;}
+    public static SprefUtils mSpref;
 
     public UserEntry myEntry;
 
@@ -27,6 +30,7 @@ public class App extends Application{
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+        mSpref = new SprefUtils(getApplicationContext());
         SocketIoUtils.init();
         UserStatus.init();
         Log.d(TAG,"create");
@@ -47,5 +51,13 @@ public class App extends Application{
 
     public void setMyEntry(UserEntry myEntry) {
         this.myEntry = myEntry;
+    }
+
+    public static void setmSpref(SprefUtils mSpref) {
+        App.mSpref = mSpref;
+    }
+
+    public static SprefUtils getmSpref() {
+        return mSpref;
     }
 }

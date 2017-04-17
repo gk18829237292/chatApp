@@ -28,10 +28,13 @@ import com.gk.chatapp.app.App;
 import com.gk.chatapp.constant.Constant;
 import com.gk.chatapp.entry.UserEntry;
 import com.gk.chatapp.model.DrawerItem;
+import com.gk.chatapp.utils.SprefUtils;
 import com.gk.chatapp.utils.UserStatus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,7 +47,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     private SwipeRefreshLayout mItemContainer;
     private ListView userListView;
 
-    private UserAdapter userAdapter;
+    private UserAdapter mUserAdapter;
 
     private int drawTag;
 
@@ -64,7 +67,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mUserEntry.addAll(UserStatus.getUserList(DrawerItem.DRAWER_ITEM_TAG_RECENT));
-        userAdapter = new UserAdapter(getActivity(),mUserEntry);
+        mUserAdapter = new UserAdapter(getActivity(),mUserEntry);
 
         initData();
     }
@@ -89,7 +92,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
                 pop.showAtLocation(view, Gravity.BOTTOM, 0, 0);
             }
         });
-        userListView.setAdapter(userAdapter);
+        userListView.setAdapter(mUserAdapter);
 
 
         return rootView;
@@ -110,7 +113,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
     public void updateComplete(){
         mUserEntry.clear();
         mUserEntry.addAll(UserStatus.getUserList(drawTag));
-        userAdapter.notifyDataSetChanged();
+        mUserAdapter.notifyDataSetChanged();
     }
 
     //如果不同 则更新
@@ -118,7 +121,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
         if(this.drawTag !=drawTag){
             mUserEntry.clear();
             mUserEntry.addAll(UserStatus.getUserList(drawTag));
-            userAdapter.notifyDataSetChanged();
+            mUserAdapter.notifyDataSetChanged();
             this.drawTag = drawTag;
             initPopupWindow(drawTag);
         }
@@ -156,9 +159,21 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
             public void onClick(View v) {
                 pop.dismiss();
                 ll_popup.clearAnimation();
+
+                UserEntry entry =mUserEntry.get(mClickPosition);
+                SprefUtils mSpref = App.getmSpref();
+                Set<String> recentUser = mSpref.getStringSet(Constant.PARAM_RECENT_USER+App.getInstance().getMyEntry().getAccount(),new HashSet<String>());
+                recentUser.add(entry.getAccount());
+                Log.d(TAG,recentUser.toString());
+                mSpref.putCommit(Constant.PARAM_RECENT_USER+App.getInstance().getMyEntry().getAccount(),recentUser);
+
+                UserStatus.addRecent(entry.getAccount());
+
+                updateComplete();
+
                 Intent intent = new Intent(getActivity(), VideoCallActivity.class);
                 intent.putExtra(Constant.PARAM_IS_CALLER,Constant.IS_CALLER_YES);
-                intent.putExtra(Constant.ACCOUNT,mUserEntry.get(mClickPosition).getAccount());
+                intent.putExtra(Constant.ACCOUNT,entry.getAccount());
                 startActivity(intent);
             }
         });
@@ -180,6 +195,26 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         });
 
+        btn_remove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserEntry entry =mUserEntry.get(mClickPosition);
+                SprefUtils mSpref = App.getmSpref();
+
+                Set<String> recentUser = mSpref.getStringSet(Constant.PARAM_RECENT_USER+App.getInstance().getMyEntry().getAccount(),new HashSet<String>());
+                recentUser.remove(entry.getAccount());
+                mSpref.putCommit(Constant.PARAM_RECENT_USER+App.getInstance().getMyEntry().getAccount(),recentUser);
+
+                UserStatus.removeRecent(entry.getAccount());
+
+                mUserEntry.remove(mClickPosition);
+                mUserAdapter.notifyDataSetChanged();
+
+                pop.dismiss();
+                ll_popup.clearAnimation();
+            }
+        });
+
         btn_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -188,7 +223,7 @@ public class UserListFragment extends Fragment implements SwipeRefreshLayout.OnR
             }
         });
 
-        if(drawTag == DrawerItem.DRAWER_ITEM_TAG_ONLINEUSER){
+        if(drawTag == DrawerItem.DRAWER_ITEM_TAG_RECENT){
             view.findViewById(R.id.ll_recent).setVisibility(View.VISIBLE);
         }else{
             view.findViewById(R.id.ll_recent).setVisibility(View.GONE);

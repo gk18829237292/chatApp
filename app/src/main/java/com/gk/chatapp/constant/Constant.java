@@ -36,4 +36,6 @@ public class Constant {
     public static final int IS_CALLER_NO = 1;
 
     public static final String PARAM_IS_CALLER="PARAM_IS_CALLER";
+
+    public static final String PARAM_RECENT_USER="PARAM_RECENT_USER";
 }

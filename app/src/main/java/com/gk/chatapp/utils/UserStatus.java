@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +108,8 @@ public class UserStatus {
                         onLineUserList.put(account,allUserList.get(account));
                     }
                     removeMySelf();
+                    //填充 最近联系
+                    fillRecent();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -128,7 +131,7 @@ public class UserStatus {
             }
         });
 
-        SocketIoUtils.sendMessage("getAllUser","");
+//        SocketIoUtils.sendMessage("getAllUser","");
     }
 
     public static void onNewUser(UserEntry userEntry){
@@ -154,16 +157,6 @@ public class UserStatus {
         }
     }
 
-    public static void addRecentUser(String account){
-        recentUserList.put(account,allUserList.get(account));
-    }
-
-    public static void addRecentUser(Set<String> accounts){
-        for(String account:accounts){
-            addRecentUser(account);
-        }
-    }
-
     public static void removeMySelf(){
         if(App.getInstance().getMyEntry() != null){
             String account = App.getInstance().getMyEntry().getAccount();
@@ -171,6 +164,31 @@ public class UserStatus {
             if(onLineUserList.containsKey(account)) onLineUserList.remove(account);
             if(recentUserList.containsKey(account)) recentUserList.remove(account);
         }
+    }
+
+    public static void removeRecent(String account){
+        if(recentUserList.containsKey(account)){
+            recentUserList.remove(account);
+        }
+    }
+
+    public static void addRecent(String account){
+        if(!recentUserList.containsKey(account) && allUserList.containsKey(account)){
+            recentUserList.put(account,allUserList.get(account));
+        }
+    }
+
+    public static void fillRecent(){
+        for(String account:App.getmSpref().getStringSet(Constant.PARAM_RECENT_USER+App.getInstance().getMyEntry().getAccount(),new HashSet<String>())){
+            addRecent(account);
+        }
+    }
+
+    public static void logout(){
+        recentUserList.clear();
+        onLineUserList.clear();
+        allUserList.clear();
+
     }
 
 }
